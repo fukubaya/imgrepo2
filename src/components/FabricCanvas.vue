@@ -1,0 +1,292 @@
+<template>
+  <div class="fabric-canvas-container">
+    <!-- キャンバス要素 -->
+    <canvas ref="canvasEl" class="fabric-canvas"></canvas>
+
+    <!-- ツールバー -->
+    <div class="canvas-toolbar">
+      <button @click="addText" title="テキスト追加" class="toolbar-btn">
+        <span class="icon">T</span>
+      </button>
+      <button @click="deleteSelected" title="選択オブジェクト削除" :disabled="!hasSelection" class="toolbar-btn">
+        <span class="icon">🗑</span>
+      </button>
+      <button @click="duplicateSelected" title="選択オブジェクト複製" :disabled="!hasSelection" class="toolbar-btn">
+        <span class="icon">+</span>
+      </button>
+      <button @click="bringToFront" title="最前面へ" :disabled="!hasSelection" class="toolbar-btn">
+        <span class="icon">↑↑</span>
+      </button>
+      <button @click="sendToBack" title="最背面へ" :disabled="!hasSelection" class="toolbar-btn">
+        <span class="icon">↓↓</span>
+      </button>
+      <button @click="undo" title="元に戻す" :disabled="!canUndo" class="toolbar-btn">
+        <span class="icon">↩</span>
+      </button>
+      <button @click="redo" title="やり直し" :disabled="!canRedo" class="toolbar-btn">
+        <span class="icon">↪</span>
+      </button>
+    </div>
+  </div>
+</template>
+
+<script setup lang="ts">
+import { ref, onMounted, computed, watch, onBeforeUnmount } from 'vue';
+import { useEditorStore } from '../stores/editorStore';
+import { useFabricCanvas } from '../composables/useFabricCanvas';
+import { useFabricText } from '../composables/useFabricText';
+
+// プロパティ
+const props = defineProps({
+  width: {
+    type: Number,
+    default: 800
+  },
+  height: {
+    type: Number,
+    default: 600
+  }
+});
+
+// イベント
+const emit = defineEmits(['canvas-ready', 'object-selected', 'object-modified']);
+
+// キャンバス要素の参照
+const canvasEl = ref<HTMLCanvasElement | null>(null);
+
+// ストア
+const store = useEditorStore();
+
+// コンポーザブル
+const { initCanvas, setBackgroundImage, resizeCanvas } = useFabricCanvas();
+const { createText } = useFabricText();
+
+// 計算プロパティ
+const hasSelection = computed(() => store.hasSelection);
+const canUndo = computed(() => store.canUndo);
+const canRedo = computed(() => store.canRedo);
+
+// キャンバスの初期化
+onMounted(() => {
+  if (canvasEl.value) {
+    // キャンバスの初期化
+    const canvas = initCanvas(canvasEl.value, {
+      width: props.width,
+      height: props.height,
+      selection: true, // グループ選択を有効化
+      preserveObjectStacking: true, // オブジェクトの重ね順を維持
+    });
+    
+    // ストアにキャンバスを設定
+    store.setCanvas(canvas);
+    
+    // イベントリスナーの設定
+    canvas.on('selection:created', handleSelection);
+    canvas.on('selection:updated', handleSelection);
+    canvas.on('selection:cleared', () => store.setSelectedObject(null));
+    canvas.on('object:modified', () => {
+      store.saveState();
+      emit('object-modified');
+    });
+    canvas.on('text:changed', () => store.saveState());
+    
+    // 背景画像の設定（もし存在すれば）
+    if (store.backgroundImage) {
+      setBackgroundImage(canvas, store.backgroundImage);
+    }
+    
+    // 初期状態を保存
+    store.saveState();
+    
+    // キャンバス準備完了イベントを発火
+    emit('canvas-ready', canvas);
+    
+    // ウィンドウリサイズ時のキャンバスサイズ調整
+    const handleResize = () => {
+      const container = canvasEl.value?.parentElement;
+      if (container) {
+        const width = container.clientWidth;
+        const height = container.clientHeight;
+        resizeCanvas(canvas, width, height);
+      }
+    };
+    
+    window.addEventListener('resize', handleResize);
+    onBeforeUnmount(() => {
+      window.removeEventListener('resize', handleResize);
+    });
+  }
+});
+
+// 選択オブジェクトの処理
+const handleSelection = (e: any) => {
+  const selected = e.selected?.[0] || e.target;
+  store.setSelectedObject(selected);
+  emit('object-selected', selected);
+};
+
+// 新しいテキストの追加
+const addText = () => {
+  if (!store.canvas) return;
+  
+  // キャンバスの中央に新しいテキストを作成
+  const text = createText('テキストを入力', {
+    left: store.canvas.width! / 2,
+    top: store.canvas.height! / 2,
+    fontFamily: 'Arial',
+    fontSize: 30,
+    fill: '#000000',
+    editable: true, // 直接編集可能に
+  });
+  
+  store.canvas.add(text);
+  store.canvas.setActiveObject(text);
+  store.canvas.requestRenderAll();
+  
+  // 編集モードをアクティブに
+  text.enterEditing();
+  
+  // 選択状態を更新
+  store.setSelectedObject(text);
+  
+  // 履歴に保存
+  store.saveState();
+};
+
+// 選択オブジェクトの削除
+const deleteSelected = () => {
+  store.deleteSelectedObject();
+};
+
+// 選択オブジェクトの複製
+const duplicateSelected = () => {
+  store.duplicateSelectedObject();
+};
+
+// 選択オブジェクトを最前面に移動
+const bringToFront = () => {
+  store.bringToFront();
+};
+
+// 選択オブジェクトを最背面に移動
+const sendToBack = () => {
+  store.sendToBack();
+};
+
+// 元に戻す
+const undo = () => {
+  store.undo();
+};
+
+// やり直し
+const redo = () => {
+  store.redo();
+};
+
+// 背景画像の変更を監視
+watch(() => store.backgroundImage, async (newImage) => {
+  if (store.canvas && newImage) {
+    console.log('背景画像を設定します:', newImage);
+    try {
+      await setBackgroundImage(store.canvas, newImage);
+      store.saveState();
+    } catch (error) {
+      console.error('背景画像の設定に失敗しました:', error);
+    }
+  }
+}, { immediate: true });
+
+// 外部に公開するメソッド
+defineExpose({
+  addText,
+  deleteSelected,
+  duplicateSelected,
+  bringToFront,
+  sendToBack,
+  undo,
+  redo
+});
+</script>
+
+<style scoped>
+.fabric-canvas-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-height: 400px;
+  background-color: #f5f5f5;
+  border: 1px solid #ddd;
+  overflow: hidden;
+}
+
+.fabric-canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.canvas-toolbar {
+  position: absolute;
+  bottom: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 5px;
+  background-color: rgba(255, 255, 255, 0.8);
+  padding: 5px;
+  border-radius: 5px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  z-index: 100;
+}
+
+.toolbar-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border: none;
+  background-color: #fff;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: all 0.2s;
+}
+
+.toolbar-btn:hover {
+  background-color: #f0f0f0;
+}
+
+.toolbar-btn:active {
+  background-color: #e0e0e0;
+}
+
+.toolbar-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.icon {
+  font-size: 18px;
+  line-height: 1;
+}
+
+@media (max-width: 600px) {
+  .canvas-toolbar {
+    bottom: 5px;
+    padding: 3px;
+  }
+  
+  .toolbar-btn {
+    width: 36px;
+    height: 36px;
+    font-size: 14px;
+  }
+  
+  .icon {
+    font-size: 16px;
+  }
+}
+</style>
