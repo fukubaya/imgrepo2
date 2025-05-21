@@ -122,13 +122,14 @@ const onFileSelected = async (event: Event) => {
       
       // イベント発火
       emit('image-loaded', dataUrl);
-      
+
       // ファイル入力をリセット
       if (fileInput.value) {
         fileInput.value.value = '';
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('ファイル読み込みエラー:', error);
+      errorMessage.value = error.message || 'ファイルの読み込みに失敗しました';
     }
   }
 };

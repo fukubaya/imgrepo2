@@ -1,8 +1,6 @@
 import { defineStore } from 'pinia';
-import { v4 as uuidv4 } from 'uuid';
-import type { EditorState, HistoryState, FabricCanvas, FabricObject, FabricIText } from '../types';
+import type { EditorState, HistoryState, FabricObject } from '../types';
 import { DEFAULT_FONT } from '../constants/fonts';
-import { DEFAULT_TEXT_EFFECT } from '../constants/textEffects';
 
 // Fabric.jsをインポート
 import { Canvas, IText } from 'fabric';

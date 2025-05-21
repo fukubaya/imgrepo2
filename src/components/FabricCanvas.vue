@@ -70,51 +70,55 @@ const canRedo = computed(() => store.canRedo);
 onMounted(() => {
   if (canvasEl.value) {
     // キャンバスの初期化
-    const canvas = initCanvas(canvasEl.value, {
-      width: props.width,
-      height: props.height,
-      selection: true, // グループ選択を有効化
-      preserveObjectStacking: true, // オブジェクトの重ね順を維持
-    });
-    
-    // ストアにキャンバスを設定
-    store.setCanvas(canvas);
-    
-    // イベントリスナーの設定
-    canvas.on('selection:created', handleSelection);
-    canvas.on('selection:updated', handleSelection);
-    canvas.on('selection:cleared', () => store.setSelectedObject(null));
-    canvas.on('object:modified', () => {
-      store.saveState();
-      emit('object-modified');
-    });
-    canvas.on('text:changed', () => store.saveState());
-    
-    // 背景画像の設定（もし存在すれば）
-    if (store.backgroundImage) {
-      setBackgroundImage(canvas, store.backgroundImage);
-    }
-    
-    // 初期状態を保存
-    store.saveState();
-    
-    // キャンバス準備完了イベントを発火
-    emit('canvas-ready', canvas);
-    
-    // ウィンドウリサイズ時のキャンバスサイズ調整
-    const handleResize = () => {
-      const container = canvasEl.value?.parentElement;
-      if (container) {
-        const width = container.clientWidth;
-        const height = container.clientHeight;
-        resizeCanvas(canvas, width, height);
+    try {
+      const canvas = initCanvas(canvasEl.value, {
+        width: props.width,
+        height: props.height,
+        selection: true, // グループ選択を有効化
+        preserveObjectStacking: true, // オブジェクトの重ね順を維持
+      });
+
+      // ストアにキャンバスを設定
+      store.setCanvas(canvas);
+
+      // イベントリスナーの設定
+      canvas.on('selection:created', handleSelection);
+      canvas.on('selection:updated', handleSelection);
+      canvas.on('selection:cleared', () => store.setSelectedObject(null));
+      canvas.on('object:modified', () => {
+        store.saveState();
+        emit('object-modified');
+      });
+      canvas.on('text:changed', () => store.saveState());
+
+      // 背景画像の設定（もし存在すれば）
+      if (store.backgroundImage) {
+        setBackgroundImage(canvas, store.backgroundImage);
       }
-    };
-    
-    window.addEventListener('resize', handleResize);
-    onBeforeUnmount(() => {
-      window.removeEventListener('resize', handleResize);
-    });
+
+      // 初期状態を保存
+      store.saveState();
+
+      // キャンバス準備完了イベントを発火
+      emit('canvas-ready', canvas);
+
+      // ウィンドウリサイズ時のキャンバスサイズ調整
+      const handleResize = () => {
+        const container = canvasEl.value?.parentElement?.parentElement;
+        if (container) {
+          const width = container.clientWidth;
+          const height = container.clientHeight;
+          resizeCanvas(canvas, width, height);
+        }
+      };
+
+      window.addEventListener('resize', handleResize);
+      onBeforeUnmount(() => {
+        window.removeEventListener('resize', handleResize);
+      });
+    } catch (error) {
+      console.error('キャンバス初期化エラー:', error);
+    }
   }
 });
 
@@ -185,13 +189,20 @@ const redo = () => {
 
 // 背景画像の変更を監視
 watch(() => store.backgroundImage, async (newImage) => {
-  if (store.canvas && newImage) {
-    console.log('背景画像を設定します:', newImage);
-    try {
-      await setBackgroundImage(store.canvas, newImage);
-      store.saveState();
-    } catch (error) {
-      console.error('背景画像の設定に失敗しました:', error);
+  if (store.canvas) {
+    if (newImage) {
+      console.log('背景画像を設定します:', newImage);
+      try {
+        await setBackgroundImage(store.canvas, newImage);
+        store.saveState();
+      } catch (error) {
+        console.error('背景画像の設定に失敗しました:', error);
+      }
+    } else {
+      if (store.canvas) {
+        store.canvas.setBackgroundImage(null, store.canvas.renderAll.bind(store.canvas));
+        store.saveState();
+      }
     }
   }
 }, { immediate: true });

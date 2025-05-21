@@ -60,7 +60,7 @@ export function useFileHandling() {
    * @param filename ファイル名
    * @param format ファイル形式
    */
-  const downloadImage = (dataUrl: string, filename: string, format: 'png' | 'jpeg' = 'png') => {
+  const downloadImage = (dataUrl: string, filename: string, format: 'png' | 'jpg' = 'png') => {
     // ダウンロード用のリンク要素を作成
     const link = document.createElement('a');
     link.href = dataUrl;
@@ -81,7 +81,7 @@ export function useFileHandling() {
    * @param format ファイル形式
    * @returns Promise<boolean> 共有成功時はtrue
    */
-  const shareImage = async (dataUrl: string, title: string, format: 'png' | 'jpeg' = 'png'): Promise<boolean> => {
+  const shareImage = async (dataUrl: string, title: string, format: 'png' | 'jpg' = 'png'): Promise<boolean> => {
     // Web Share APIが利用可能かチェック
     if (!navigator.share || !navigator.canShare) {
       errorMessage.value = '共有機能はこのブラウザでサポートされていません';

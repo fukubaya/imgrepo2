@@ -1,15 +1,15 @@
 import { ref } from 'vue';
-import type { FabricCanvas, FabricObject } from '../types';
+import type { FabricObject } from '../types';
 
 // Fabric.jsをインポート
-import { Canvas, Image } from 'fabric';
+import { Canvas, FabricImage } from 'fabric';
 
 /**
  * Fabric.jsキャンバスを操作するためのコンポーザブル
  */
 export function useFabricCanvas() {
   // キャンバス参照
-  const canvas = ref<FabricCanvas | null>(null);
+  const canvas = ref<Canvas | null>(null);
 
   /**
    * キャンバスの初期化
@@ -17,7 +17,7 @@ export function useFabricCanvas() {
    * @param options キャンバスオプション
    * @returns 初期化されたキャンバス
    */
-  const initCanvas = (canvasEl: HTMLCanvasElement, options: any = {}): FabricCanvas => {
+  const initCanvas = (canvasEl: HTMLCanvasElement, options: any = {}): Canvas => {
     // Fabric.jsキャンバスの作成
     const fabricCanvas = new Canvas(canvasEl, {
       preserveObjectStacking: true, // オブジェクトの重ね順を維持
@@ -37,12 +37,12 @@ export function useFabricCanvas() {
    * @param imageUrl 画像URL
    * @returns Promise
    */
-  const setBackgroundImage = (canvas: FabricCanvas, imageUrl: string): Promise<void> => {
+  const setBackgroundImage = (fCanvas: Canvas, imageUrl: string): Promise<void> => {
     return new Promise((resolve, reject) => {
       console.log('setBackgroundImage called with:', imageUrl.substring(0, 50) + '...');
       
       // Fabric.jsのImage.fromURLを使用して画像を読み込む
-      Image.fromURL(imageUrl, (fabricImage) => {
+      FabricImage.fromURL(imageUrl).then((fabricImage: FabricImage) => {
         if (!fabricImage) {
           console.error('Failed to load image');
           reject(new Error('画像の読み込みに失敗しました'));
@@ -51,8 +51,8 @@ export function useFabricCanvas() {
         
         try {
           // キャンバスのサイズを取得
-          const canvasWidth = canvas.width || 800;
-          const canvasHeight = canvas.height || 600;
+          const canvasWidth = fCanvas.width;
+          const canvasHeight = fCanvas.height;
           
           // 画像のサイズを取得
           const imgWidth = fabricImage.width || 1;
@@ -75,14 +75,15 @@ export function useFabricCanvas() {
           });
           
           // 背景として設定
-          canvas.setBackgroundImage(fabricImage, canvas.renderAll.bind(canvas));
+          fCanvas.backgroundImage = fabricImage;
+          fCanvas.renderAll();
           console.log('Background image set successfully');
           resolve();
         } catch (error) {
           console.error('Error setting background image:', error);
           reject(error);
         }
-      }, { crossOrigin: 'anonymous' }); // CORS対応
+      });
     });
   };
 
@@ -92,11 +93,14 @@ export function useFabricCanvas() {
    * @param width 幅
    * @param height 高さ
    */
-  const resizeCanvas = (canvas: FabricCanvas, width: number, height: number) => {
+  const resizeCanvas = (fCanvas: Canvas, width: number, height: number) => {
     // キャンバスのサイズを設定
-    canvas.setWidth(width);
-    canvas.setHeight(height);
-    canvas.requestRenderAll();
+    console.log('Resizing canvas to:', width, height);
+    fCanvas.width = width;
+    fCanvas.height = height;
+    //fCanvas.setWidth(width);
+    //fCanvas.setHeight(height);
+    fCanvas.requestRenderAll();
   };
 
   /**
@@ -104,7 +108,7 @@ export function useFabricCanvas() {
    * @param canvas キャンバス
    * @param object 選択するオブジェクト
    */
-  const selectObject = (canvas: FabricCanvas, object: FabricObject) => {
+  const selectObject = (canvas: Canvas, object: FabricObject) => {
     canvas.setActiveObject(object);
     canvas.requestRenderAll();
   };
@@ -113,7 +117,7 @@ export function useFabricCanvas() {
    * 選択の解除
    * @param canvas キャンバス
    */
-  const deselectAll = (canvas: FabricCanvas) => {
+  const deselectAll = (canvas: Canvas) => {
     canvas.discardActiveObject();
     canvas.requestRenderAll();
   };
@@ -125,7 +129,7 @@ export function useFabricCanvas() {
    * @returns データURL
    */
   const exportCanvas = (
-    canvas: FabricCanvas,
+    canvas: Canvas,
     options: { format?: 'png' | 'jpeg'; quality?: number } = {}
   ): string => {
     const { format = 'png', quality = 1 } = options;

@@ -13,12 +13,12 @@
     </header>
 
     <main class="app-main">
-      <div class="editor-container">
+      <div ref="editorEl" class="editor-container">
         <div v-if="!hasBackgroundImage" class="upload-container">
           <ImageUploader @image-loaded="onImageLoaded" />
         </div>
         <div v-else class="canvas-container">
-          <FabricCanvas ref="canvasRef" @object-selected="onObjectSelected" />
+          <FabricCanvas ref="canvasRef" @object-selected="onObjectSelected" :width="elWidth" :height="elHeight"/>
         </div>
       </div>
 
@@ -69,12 +69,15 @@ const { downloadImage, shareImage: shareImageFile } = useFileHandling();
 const { isOffline } = usePwa();
 
 // コンポーネント参照
+const editorEl = ref<HTMLElement | null>(null);
 const canvasRef = ref<InstanceType<typeof FabricCanvas> | null>(null);
 const installPromptRef = ref<InstanceType<typeof InstallPrompt> | null>(null);
 
 // 計算プロパティ
 const hasBackgroundImage = computed(() => store.hasBackgroundImage);
 const isTextSelected = computed(() => store.isTextSelected);
+const elWidth = computed(() => editorEl.value ? editorEl.value.clientWidth : 800);
+const elHeight = computed(() => editorEl.value ? editorEl.value.clientHeight : 600);
 
 // モバイル判定
 const isMobile = ref(false);
@@ -122,7 +125,7 @@ const exportImage = () => {
   if (!store.canvas) return;
   
   // キャンバスをエクスポート
-  const dataUrl = store.exportCanvas('png');
+  const dataUrl = store.exportCanvas('jpeg');
   if (dataUrl) {
     // ファイル名の生成（現在日時を含む）
     const now = new Date();
@@ -130,7 +133,7 @@ const exportImage = () => {
     const filename = `image_editor_${dateStr}`;
     
     // ダウンロード
-    downloadImage(dataUrl, filename, 'png');
+    downloadImage(dataUrl, filename, 'jpg');
   }
 };
 
@@ -139,13 +142,13 @@ const shareImage = async () => {
   if (!store.canvas) return;
   
   // キャンバスをエクスポート
-  const dataUrl = store.exportCanvas('png');
+  const dataUrl = store.exportCanvas('jpeg');
   if (dataUrl) {
     // ファイル名の生成
     const filename = `画像テキストエディタ_${new Date().toISOString().split('T')[0]}`;
     
     // 共有
-    await shareImageFile(dataUrl, filename, 'png');
+    await shareImageFile(dataUrl, filename, 'jpg');
   }
 };
 </script>
