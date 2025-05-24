@@ -30,11 +30,7 @@
         </div>
         
         <div class="sidebar-section">
-          <TextStylePanel />
-        </div>
-        
-        <div class="sidebar-section">
-          <TextEffectsPanel />
+          <TextPanel />
         </div>
       </div>
     </main>
@@ -56,8 +52,7 @@ import { useEditorStore } from './stores/editorStore';
 import { useFileHandling } from './composables/useFileHandling';
 import { usePwa } from './composables/usePwa';
 import FabricCanvas from './components/FabricCanvas.vue';
-import TextStylePanel from './components/TextStylePanel.vue';
-import TextEffectsPanel from './components/TextEffectsPanel.vue';
+import TextPanel from './components/TextPanel.vue';
 import ImageUploader from './components/ImageUploader.vue';
 import InstallPrompt from './components/InstallPrompt.vue';
 
