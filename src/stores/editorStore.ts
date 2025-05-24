@@ -56,53 +56,13 @@ export const useEditorStore = defineStore('editor', {
     },
     
     // 選択オブジェクトの設定
-    setSelectedObject(object: FabricObject | null) {
+    setSelectedObject(object: IText | null) {
       this.selectedObject = object;
     },
     
     // 編集状態の設定
     setEditingState(isEditing: boolean) {
       this.isEditing = isEditing;
-    },
-    
-    // 新しいテキストの追加
-    addText(options: Partial<any> = {}) {
-      if (!this.canvas) return null;
-      
-      // デフォルト位置（キャンバスの中央）
-      const defaultLeft = this.canvas.width ? this.canvas.width / 2 : 200;
-      const defaultTop = this.canvas.height ? this.canvas.height / 2 : 200;
-      
-      // テキストオプションの設定
-      const textOptions = {
-        text: 'テキストを入力',
-        left: defaultLeft,
-        top: defaultTop,
-        fontFamily: DEFAULT_FONT,
-        fontSize: 30,
-        fill: '#000000',
-        fontWeight: 'normal',
-        fontStyle: 'normal',
-        textAlign: 'left',
-        editable: true,
-        ...options
-      };
-      
-      // テキストオブジェクトの作成
-      const text = new IText(textOptions.text, textOptions);
-      
-      // キャンバスに追加
-      this.canvas.add(text);
-      this.canvas.setActiveObject(text);
-      this.canvas.requestRenderAll();
-      
-      // 選択状態を更新
-      this.setSelectedObject(text);
-      
-      // 履歴に保存
-      this.saveState();
-      
-      return text;
     },
     
     // 選択オブジェクトの削除
@@ -121,7 +81,7 @@ export const useEditorStore = defineStore('editor', {
     duplicateSelectedObject() {
       if (!this.canvas || !this.selectedObject) return;
       
-      this.selectedObject.clone((cloned: FabricObject) => {
+      this.selectedObject.clone().then((cloned: IText) => {
         // 少しオフセットして配置
         cloned.set({
           left: (this.selectedObject?.left || 0) + 20,

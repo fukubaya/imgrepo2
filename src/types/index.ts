@@ -1,4 +1,6 @@
 // Fabric.jsの型定義を簡略化
+import { IText } from 'fabric';
+
 export interface FabricCanvas {
   width?: number;
   height?: number;
@@ -21,17 +23,6 @@ export interface FabricObject {
   top?: number;
   set: (options: any) => any;
   clone: (callback: (cloned: any) => void) => void;
-  [key: string]: any;
-}
-
-export interface FabricIText extends FabricObject {
-  text: string;
-  fontFamily?: string;
-  fontSize?: number;
-  fill?: string;
-  fontWeight?: string | number;
-  fontStyle?: string;
-  textAlign?: string;
   [key: string]: any;
 }
 
@@ -68,7 +59,7 @@ export interface TextOptions {
 export interface EditorState {
   canvas: FabricCanvas | null;
   backgroundImage: string | null;
-  selectedObject: FabricObject | null;
+  selectedObject: IText | null;
   isEditing: boolean;
 }
 

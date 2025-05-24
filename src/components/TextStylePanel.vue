@@ -70,10 +70,11 @@
 
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue';
+import { IText } from 'fabric';
 import { useEditorStore } from '../stores/editorStore';
 import { useFabricText } from '../composables/useFabricText';
 import { AVAILABLE_FONTS } from '../constants/fonts';
-import type { FabricIText } from '../types';
+
 
 // ストア
 const store = useEditorStore();
@@ -90,9 +91,9 @@ const isTextSelected = computed(() => {
 });
 
 // 選択中のテキストオブジェクト
-const selectedText = computed<FabricIText | null>(() => {
+const selectedText = computed<IText | null>(() => {
   if (isTextSelected.value && store.selectedObject) {
-    return store.selectedObject as FabricIText;
+    return store.selectedObject as IText;
   }
   return null;
 });

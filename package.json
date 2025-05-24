@@ -11,7 +11,7 @@
   "dependencies": {
     "@types/fabric": "^5.3.10",
     "@types/uuid": "^10.0.0",
-    "fabric": "^6.6.1",
+    "fabric": "^6.6.5",
     "pinia": "^3.0.1",
     "uuid": "^11.1.0",
     "vite-plugin-pwa": "^0.21.2",

@@ -5,25 +5,6 @@
     </div>
 
     <div class="panel-content" v-if="isTextSelected">
-      <!-- 回転設定 -->
-      <div class="effect-section">
-        <h4>回転</h4>
-        <div class="rotation-control">
-          <input 
-            type="range" 
-            v-model.number="rotation" 
-            min="0" 
-            max="359" 
-            @input="updateRotation" 
-            class="effect-slider"
-          />
-          <span class="value-display">{{ rotation }}°</span>
-          <button @click="resetRotation" title="回転をリセット" class="reset-btn">
-            <span class="icon">↺</span>
-          </button>
-        </div>
-      </div>
-      
       <!-- 影効果 -->
       <div class="effect-section">
         <div class="effect-header">
@@ -117,10 +98,11 @@
 
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue';
+import { IText } from 'fabric';
 import { useEditorStore } from '../stores/editorStore';
 import { useFabricText } from '../composables/useFabricText';
 import { TEXT_EFFECT_PRESETS } from '../constants/textEffects';
-import type { FabricIText } from '../types';
+
 
 // ストア
 const store = useEditorStore();
@@ -134,15 +116,12 @@ const isTextSelected = computed(() => {
 });
 
 // 選択中のテキストオブジェクト
-const selectedText = computed<FabricIText | null>(() => {
+const selectedText = computed<IText | null>(() => {
   if (isTextSelected.value && store.selectedObject) {
-    return store.selectedObject as FabricIText;
+    return store.selectedObject as IText;
   }
   return null;
 });
-
-// 回転設定
-const rotation = ref(0);
 
 // 影設定
 const hasShadow = ref(false);
@@ -159,9 +138,6 @@ const outlineWidth = ref(1);
 // 選択テキストが変わったら効果設定を更新
 watch(selectedText, (text) => {
   if (text) {
-    // 回転
-    rotation.value = Math.round(text.angle || 0);
-    
     // 影
     const shadow = text.shadow;
     hasShadow.value = !!shadow;
@@ -180,24 +156,6 @@ watch(selectedText, (text) => {
     }
   }
 }, { immediate: true });
-
-// 回転の更新
-const updateRotation = () => {
-  if (!selectedText.value) return;
-  
-  updateTextStyle(selectedText.value, {
-    angle: rotation.value
-  });
-  
-  // 履歴に保存
-  store.saveState();
-};
-
-// 回転のリセット
-const resetRotation = () => {
-  rotation.value = 0;
-  updateRotation();
-};
 
     // 影の更新
 const updateShadow = () => {
@@ -384,12 +342,6 @@ const applyPreset = (presetName: string) => {
   border: 1px solid #ddd;
   border-radius: 4px;
   cursor: pointer;
-}
-
-.rotation-control {
-  display: flex;
-  align-items: center;
-  gap: 10px;
 }
 
 .reset-btn {

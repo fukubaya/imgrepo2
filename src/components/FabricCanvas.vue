@@ -140,19 +140,12 @@ const addText = () => {
     fontFamily: 'Arial',
     fontSize: 30,
     fill: '#000000',
-    editable: true, // 直接編集可能に
   });
-  
+
   store.canvas.add(text);
   store.canvas.setActiveObject(text);
   store.canvas.requestRenderAll();
-  
-  // 編集モードをアクティブに
-  text.enterEditing();
-  
-  // 選択状態を更新
-  store.setSelectedObject(text);
-  
+
   // 履歴に保存
   store.saveState();
 };

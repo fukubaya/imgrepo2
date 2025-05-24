@@ -1,7 +1,7 @@
-import type { FabricIText, FabricObject, TextOptions, TextEffectPreset } from '../types';
-
+import type { TextEffectPreset } from '../types';
+import { markRaw } from 'vue';
 // Fabric.jsをインポート
-import { IText, Shadow } from 'fabric';
+import { IText, type ITextProps, Shadow } from 'fabric';
 
 /**
  * Fabric.jsのテキスト操作のためのコンポーザブル
@@ -13,18 +13,18 @@ export function useFabricText() {
    * @param options テキストオプション
    * @returns テキストオブジェクト
    */
-  const createText = (text: string, options: Partial<TextOptions> = {}): FabricIText => {
+  const createText = (text: string, options: Partial<ITextProps> = {}): IText => {
     // テキストオブジェクトの作成
-    return new IText(text, {
+    return markRaw(new IText(text, {
       fontFamily: 'Arial',
       fontSize: 30,
       fill: '#000000',
       fontWeight: 'normal',
       fontStyle: 'normal',
       textAlign: 'left',
-      editable: true, // 直接編集可能
+      editable: true,
       ...options
-    });
+    }));
   };
 
   /**
@@ -32,7 +32,7 @@ export function useFabricText() {
    * @param textObject テキストオブジェクト
    * @param styleOptions スタイルオプション
    */
-  const updateTextStyle = (textObject: FabricIText, styleOptions: Partial<TextOptions>) => {
+  const updateTextStyle = (textObject: IText, styleOptions: Partial<ITextProps>) => {
     // スタイルを適用
     textObject.set(styleOptions);
 
@@ -47,9 +47,9 @@ export function useFabricText() {
    * @param textObject テキストオブジェクト
    * @param effect 効果プリセット
    */
-  const applyTextEffect = (textObject: FabricIText, effect: TextEffectPreset) => {
+  const applyTextEffect = (textObject: IText, effect: TextEffectPreset) => {
     // 効果のオプションを作成
-    const effectOptions: Partial<TextOptions> = {};
+    const effectOptions: Partial<ITextProps> = {};
 
     // 影の設定
     if (effect.shadow) {
@@ -95,7 +95,7 @@ export function useFabricText() {
    * @param left X座標
    * @param top Y座標
    */
-  const setTextPosition = (textObject: FabricIText, left: number, top: number) => {
+  const setTextPosition = (textObject: IText, left: number, top: number) => {
     textObject.set({
       left,
       top
@@ -112,7 +112,7 @@ export function useFabricText() {
    * @param textObject テキストオブジェクト
    * @param angle 角度（度）
    */
-  const rotateText = (textObject: FabricIText, angle: number) => {
+  const rotateText = (textObject: IText, angle: number) => {
     textObject.set({
       angle
     });
@@ -128,7 +128,7 @@ export function useFabricText() {
    * @param textObject テキストオブジェクト
    * @param newText 新しいテキスト内容
    */
-  const updateTextContent = (textObject: FabricIText, newText: string) => {
+  const updateTextContent = (textObject: IText, newText: string) => {
     textObject.set({
       text: newText
     });
@@ -144,8 +144,8 @@ export function useFabricText() {
    * @param textObject テキストオブジェクト
    * @param callback 複製完了時のコールバック
    */
-  const duplicateText = (textObject: FabricIText, callback: (cloned: FabricIText) => void) => {
-    textObject.clone((cloned: FabricObject) => {
+  const duplicateText = (textObject: IText, callback: (cloned: IText) => void) => {
+    textObject.clone().then((cloned: IText) => {
       // 少しオフセットして配置
       cloned.set({
         left: (textObject.left || 0) + 20,
@@ -153,7 +153,7 @@ export function useFabricText() {
         evented: true,
       });
 
-      callback(cloned as FabricIText);
+      callback(cloned);
     });
   };
 
