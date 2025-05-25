@@ -5,6 +5,13 @@
 
     <!-- ツールバー -->
     <div class="canvas-toolbar">
+      <button
+        @click="addTextFromClipboard"
+        title="クリップボードからテキスト追加"
+        class="toolbar-btn"
+      >
+        <span class="icon">📋T</span>
+      </button>
       <button @click="addText" title="テキスト追加" class="toolbar-btn">
         <span class="icon">T</span>
       </button>
@@ -142,12 +149,43 @@ onMounted(() => {
 });
 
 // 選択オブジェクトの処理
-import { IEvent } from "fabric";
-
-const handleSelection = (e: IEvent) => {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const handleSelection = (e: any) => {
   const selected = e.selected?.[0] || e.target;
   store.setSelectedObject(selected);
   emit("object-selected", selected);
+};
+
+// クリップボードからテキストを追加
+const addTextFromClipboard = async () => {
+  if (!store.canvas) return;
+
+  try {
+    const clipboardText = await navigator.clipboard.readText();
+    const textContent = clipboardText || "テキストを入力";
+
+    // キャンバスの中央に新しいテキストを作成
+    const scale = store.canvas.getZoom();
+    const text = createText(textContent, {
+      left: store.canvas.width! / 2,
+      top: store.canvas.height! / 2,
+      fontFamily: "Arial",
+      fontSize: 30,
+      fill: "#000000",
+      scaleX: 1 / scale,
+      scaleY: 1 / scale,
+    });
+
+    store.canvas.add(text);
+    store.canvas.setActiveObject(text);
+    store.canvas.requestRenderAll();
+
+    // 履歴に保存
+    store.saveState();
+  } catch (error) {
+    console.error("クリップボードからのテキスト追加エラー:", error);
+    addText(); // クリップボードが利用できない場合は、通常のテキスト追加処理を実行
+  }
 };
 
 // 新しいテキストの追加
