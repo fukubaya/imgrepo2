@@ -31,7 +31,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed, watch, onBeforeUnmount } from 'vue';
+import { ref, onMounted, computed, watch } from 'vue';
 import { useEditorStore } from '../stores/editorStore';
 import { useFabricCanvas } from '../composables/useFabricCanvas';
 import { useFabricText } from '../composables/useFabricText';
@@ -58,7 +58,7 @@ const canvasEl = ref<HTMLCanvasElement | null>(null);
 const store = useEditorStore();
 
 // コンポーザブル
-const { initCanvas, setBackgroundImage, resizeCanvas } = useFabricCanvas();
+const { initCanvas, setBackgroundImage } = useFabricCanvas();
 const { createText } = useFabricText();
 
 // 計算プロパティ
@@ -101,21 +101,6 @@ onMounted(() => {
 
       // キャンバス準備完了イベントを発火
       emit('canvas-ready', canvas);
-
-      // ウィンドウリサイズ時のキャンバスサイズ調整
-      const handleResize = () => {
-        const container = canvasEl.value?.parentElement?.parentElement;
-        if (container) {
-          const width = container.clientWidth;
-          const height = container.clientHeight;
-          resizeCanvas(canvas, width, height);
-        }
-      };
-
-      window.addEventListener('resize', handleResize);
-      onBeforeUnmount(() => {
-        window.removeEventListener('resize', handleResize);
-      });
     } catch (error) {
       console.error('キャンバス初期化エラー:', error);
     }
@@ -215,7 +200,6 @@ defineExpose({
 <style scoped>
 .fabric-canvas-container {
   position: relative;
-  width: 100%;
   height: 100%;
   min-height: 400px;
   background-color: #f5f5f5;

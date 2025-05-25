@@ -50,6 +50,7 @@
 import { ref, computed, onMounted } from 'vue';
 import { useEditorStore } from './stores/editorStore';
 import { useFileHandling } from './composables/useFileHandling';
+import { useFabricCanvas } from './composables/useFabricCanvas';
 import { usePwa } from './composables/usePwa';
 import FabricCanvas from './components/FabricCanvas.vue';
 import TextPanel from './components/TextPanel.vue';
@@ -62,6 +63,7 @@ const store = useEditorStore();
 // コンポーザブル
 const { downloadImage, shareImage: shareImageFile } = useFileHandling();
 const { isOffline } = usePwa();
+const { exportCanvas } = useFabricCanvas();
 
 // コンポーネント参照
 const editorEl = ref<HTMLElement | null>(null);
@@ -120,7 +122,7 @@ const exportImage = () => {
   if (!store.canvas) return;
   
   // キャンバスをエクスポート
-  const dataUrl = store.exportCanvas('jpeg');
+  const dataUrl = exportCanvas(store.canvas, 'jpeg');
   if (dataUrl) {
     // ファイル名の生成（現在日時を含む）
     const now = new Date();
@@ -137,7 +139,7 @@ const shareImage = async () => {
   if (!store.canvas) return;
   
   // キャンバスをエクスポート
-  const dataUrl = store.exportCanvas('jpeg');
+  const dataUrl = await exportCanvas(store.canvas, 'jpeg');
   if (dataUrl) {
     // ファイル名の生成
     const filename = `画像テキストエディタ_${new Date().toISOString().split('T')[0]}`;
@@ -264,6 +266,12 @@ button {
   width: 100%;
   height: 100%;
   min-height: 400px;
+}
+.canvas-container {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
 }
 
 .sidebar {

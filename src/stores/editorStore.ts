@@ -1,6 +1,5 @@
 import { defineStore } from 'pinia';
-import type { EditorState, HistoryState, FabricObject } from '../types';
-import { DEFAULT_FONT } from '../constants/fonts';
+import type { EditorState, HistoryState } from '../types';
 
 // Fabric.jsをインポート
 import { Canvas, IText } from 'fabric';
@@ -223,30 +222,5 @@ export const useEditorStore = defineStore('editor', {
       this.setSelectedObject(null);
       this.canvas.requestRenderAll();
     },
-    
-    // キャンバスの画像としてエクスポート
-    exportCanvas(format: 'png' | 'jpeg' = 'png', quality: number = 1): string | null {
-      if (!this.canvas) return null;
-      
-      // 選択状態を一時的に解除
-      const activeObject = this.canvas.getActiveObject();
-      this.canvas.discardActiveObject();
-      this.canvas.requestRenderAll();
-      
-      // 画像としてエクスポート
-      const dataUrl = this.canvas.toDataURL({
-        format,
-        quality,
-        multiplier: 2 // 高解像度
-      });
-      
-      // 選択状態を復元
-      if (activeObject) {
-        this.canvas.setActiveObject(activeObject);
-        this.canvas.requestRenderAll();
-      }
-      
-      return dataUrl;
-    }
   }
 });

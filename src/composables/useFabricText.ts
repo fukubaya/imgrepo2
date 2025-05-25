@@ -23,6 +23,7 @@ export function useFabricText() {
       fontStyle: 'normal',
       textAlign: 'left',
       editable: true,
+      paintFirst: 'stroke',
       ...options
     }));
   };

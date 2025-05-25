@@ -1,8 +1,7 @@
 import { ref } from 'vue';
-import type { FabricObject } from '../types';
 
 // Fabric.jsをインポート
-import { Canvas, FabricImage } from 'fabric';
+import { Canvas, IText, FabricImage } from 'fabric';
 
 /**
  * Fabric.jsキャンバスを操作するためのコンポーザブル
@@ -50,32 +49,19 @@ export function useFabricCanvas() {
         }
         
         try {
-          // キャンバスのサイズを取得
-          const canvasWidth = fCanvas.width;
-          const canvasHeight = fCanvas.height;
+          const scale = resizeCanvas(fCanvas, fabricImage);
           
-          // 画像のサイズを取得
-          const imgWidth = fabricImage.width || 1;
-          const imgHeight = fabricImage.height || 1;
-          
-          // 画像のアスペクト比を維持しながらキャンバスに合わせる
-          const scale = Math.min(
-            canvasWidth / imgWidth,
-            canvasHeight / imgHeight
-          );
-          
-          // 画像をキャンバスの中央に配置
+          // 画像を配置
           fabricImage.set({
-            scaleX: scale,
-            scaleY: scale,
-            left: (canvasWidth - imgWidth * scale) / 2,
-            top: (canvasHeight - imgHeight * scale) / 2,
-            selectable: false, // 選択不可
-            evented: false, // イベント無効
+            left: 0,
+            top: 0,
+            selectable: false,
+            evented: false,
           });
           
           // 背景として設定
           fCanvas.backgroundImage = fabricImage;
+          fCanvas.setZoom(scale);
           fCanvas.renderAll();
           console.log('Background image set successfully');
           resolve();
@@ -87,28 +73,56 @@ export function useFabricCanvas() {
     });
   };
 
-  /**
-   * キャンバスのリサイズ
-   * @param canvas キャンバス
-   * @param width 幅
-   * @param height 高さ
-   */
-  const resizeCanvas = (fCanvas: Canvas, width: number, height: number) => {
-    // キャンバスのサイズを設定
-    console.log('Resizing canvas to:', width, height);
-    fCanvas.width = width;
-    fCanvas.height = height;
-    //fCanvas.setWidth(width);
-    //fCanvas.setHeight(height);
+  const resizeCanvas = (fCanvas: Canvas, fabricImage: FabricImage): number => {
+    if(!fabricImage) {
+      return 1.0;
+    }
+
+    const containerWidth = fCanvas.wrapperEl.parentElement?.offsetWidth || fCanvas.width;
+    const containerHeight = fCanvas.wrapperEl.parentElement?.offsetHeight || fCanvas.height;
+
+    // 画像のサイズを取得
+    const imgWidth = fabricImage.width || 1;
+    const imgHeight = fabricImage.height || 1;
+          
+    // 画像のアスペクト比を維持しながらキャンバスのサイズを調整
+    const scaleX = containerWidth / imgWidth;
+    const scaleY = containerHeight / imgHeight;
+    const scale = Math.min(scaleX, scaleY);
+    fCanvas.width = imgWidth;
+    fCanvas.height = imgHeight
+
+    let elWidth;
+    let elHeight;
+    if (scaleX > scaleY) {
+      elWidth = containerHeight * (imgWidth / imgHeight);
+      elHeight = containerHeight;
+    } else {
+      elWidth = containerWidth;
+      elHeight = containerWidth * (imgHeight / imgWidth);
+    }
+
+    fCanvas.upperCanvasEl.style.width = elWidth + 'px';
+    fCanvas.upperCanvasEl.style.height = elHeight + 'px';
+    fCanvas.upperCanvasEl.setAttribute('width', elWidth.toString());
+    fCanvas.upperCanvasEl.setAttribute('height', elHeight.toString());
+    fCanvas.lowerCanvasEl.style.width = elWidth + 'px';
+    fCanvas.lowerCanvasEl.style.height = elHeight + 'px';
+    fCanvas.lowerCanvasEl.setAttribute('width', elWidth.toString());
+    fCanvas.lowerCanvasEl.setAttribute('height', elHeight.toString());
+    fCanvas.wrapperEl.style.width = elWidth + 'px';
+    fCanvas.wrapperEl.style.height = elHeight + 'px';
+
     fCanvas.requestRenderAll();
-  };
+    return scale;
+  }
 
   /**
    * オブジェクトの選択
    * @param canvas キャンバス
    * @param object 選択するオブジェクト
    */
-  const selectObject = (canvas: Canvas, object: FabricObject) => {
+  const selectObject = (canvas: Canvas, object: IText) => {
     canvas.setActiveObject(object);
     canvas.requestRenderAll();
   };
@@ -136,15 +150,22 @@ export function useFabricCanvas() {
 
     // 選択状態を一時的に解除
     const activeObject = canvas.getActiveObject();
+    const z = canvas.getZoom();
     canvas.discardActiveObject();
     canvas.requestRenderAll();
+
+    // zoomを一時的に戻す
+    canvas.setZoom(1.0);
 
     // 画像としてエクスポート
     const dataUrl = canvas.toDataURL({
       format,
       quality,
-      multiplier: 2 // 高解像度
+      multiplier: 1.0,
     });
+
+    // zoomを戻す
+    canvas.setZoom(z);
 
     // 選択状態を復元
     if (activeObject) {
