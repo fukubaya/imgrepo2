@@ -1,7 +1,7 @@
-import type { TextEffectPreset } from '../types';
-import { markRaw } from 'vue';
+import { markRaw } from "vue";
+import type { TextEffectPreset } from "../types";
 // Fabric.jsをインポート
-import { IText, type ITextProps, Shadow } from 'fabric';
+import { IText, type ITextProps, Shadow } from "fabric";
 
 /**
  * Fabric.jsのテキスト操作のためのコンポーザブル
@@ -15,17 +15,19 @@ export function useFabricText() {
    */
   const createText = (text: string, options: Partial<ITextProps> = {}): IText => {
     // テキストオブジェクトの作成
-    return markRaw(new IText(text, {
-      fontFamily: 'Arial',
-      fontSize: 30,
-      fill: '#000000',
-      fontWeight: 'normal',
-      fontStyle: 'normal',
-      textAlign: 'left',
-      editable: true,
-      paintFirst: 'stroke',
-      ...options
-    }));
+    return markRaw(
+      new IText(text, {
+        fontFamily: "Arial",
+        fontSize: 30,
+        fill: "#000000",
+        fontWeight: "normal",
+        fontStyle: "normal",
+        textAlign: "left",
+        editable: true,
+        paintFirst: "stroke",
+        ...options,
+      }),
+    );
   };
 
   /**
@@ -58,7 +60,7 @@ export function useFabricText() {
         color: effect.shadow.color,
         blur: effect.shadow.blur,
         offsetX: effect.shadow.offsetX,
-        offsetY: effect.shadow.offsetY
+        offsetY: effect.shadow.offsetY,
       });
     } else {
       effectOptions.shadow = null;
@@ -99,7 +101,7 @@ export function useFabricText() {
   const setTextPosition = (textObject: IText, left: number, top: number) => {
     textObject.set({
       left,
-      top
+      top,
     });
 
     // キャンバスの再描画をリクエスト
@@ -115,7 +117,7 @@ export function useFabricText() {
    */
   const rotateText = (textObject: IText, angle: number) => {
     textObject.set({
-      angle
+      angle,
     });
 
     // キャンバスの再描画をリクエスト
@@ -131,7 +133,7 @@ export function useFabricText() {
    */
   const updateTextContent = (textObject: IText, newText: string) => {
     textObject.set({
-      text: newText
+      text: newText,
     });
 
     // キャンバスの再描画をリクエスト
@@ -165,6 +167,6 @@ export function useFabricText() {
     setTextPosition,
     rotateText,
     updateTextContent,
-    duplicateText
+    duplicateText,
   };
 }

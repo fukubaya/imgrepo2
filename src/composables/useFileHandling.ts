@@ -1,4 +1,4 @@
-import { ref } from 'vue';
+import { ref } from "vue";
 
 /**
  * ファイル操作のためのコンポーザブル
@@ -21,10 +21,10 @@ export function useFileHandling() {
       errorMessage.value = null;
 
       // ファイルが画像かどうかチェック
-      if (!file.type.match('image.*')) {
-        errorMessage.value = '画像ファイルを選択してください';
+      if (!file.type.match("image.*")) {
+        errorMessage.value = "画像ファイルを選択してください";
         isLoading.value = false;
-        reject(new Error('画像ファイルではありません'));
+        reject(new Error("画像ファイルではありません"));
         return;
       }
 
@@ -37,16 +37,16 @@ export function useFileHandling() {
         if (e.target?.result) {
           resolve(e.target.result as string);
         } else {
-          errorMessage.value = 'ファイルの読み込みに失敗しました';
-          reject(new Error('ファイルの読み込みに失敗しました'));
+          errorMessage.value = "ファイルの読み込みに失敗しました";
+          reject(new Error("ファイルの読み込みに失敗しました"));
         }
       };
 
       // エラー時の処理
       reader.onerror = () => {
         isLoading.value = false;
-        errorMessage.value = 'ファイルの読み込み中にエラーが発生しました';
-        reject(new Error('ファイルの読み込み中にエラーが発生しました'));
+        errorMessage.value = "ファイルの読み込み中にエラーが発生しました";
+        reject(new Error("ファイルの読み込み中にエラーが発生しました"));
       };
 
       // ファイルをデータURLとして読み込み
@@ -60,9 +60,9 @@ export function useFileHandling() {
    * @param filename ファイル名
    * @param format ファイル形式
    */
-  const downloadImage = (dataUrl: string, filename: string, format: 'png' | 'jpg' = 'png') => {
+  const downloadImage = (dataUrl: string, filename: string, format: "png" | "jpg" = "png") => {
     // ダウンロード用のリンク要素を作成
-    const link = document.createElement('a');
+    const link = document.createElement("a");
     link.href = dataUrl;
     link.download = `${filename}.${format}`;
 
@@ -81,10 +81,10 @@ export function useFileHandling() {
    * @param format ファイル形式
    * @returns Promise<boolean> 共有成功時はtrue
    */
-  const shareImage = async (dataUrl: string, title: string, format: 'png' | 'jpg' = 'png'): Promise<boolean> => {
+  const shareImage = async (dataUrl: string, title: string, format: "png" | "jpg" = "png"): Promise<boolean> => {
     // Web Share APIが利用可能かチェック
     if (!navigator.share || !navigator.canShare) {
-      errorMessage.value = '共有機能はこのブラウザでサポートされていません';
+      errorMessage.value = "共有機能はこのブラウザでサポートされていません";
       return false;
     }
 
@@ -99,12 +99,12 @@ export function useFileHandling() {
       // 共有データを作成
       const shareData = {
         title: title,
-        files: [file]
+        files: [file],
       };
 
       // 共有可能かチェック
       if (!navigator.canShare(shareData)) {
-        errorMessage.value = 'この内容は共有できません';
+        errorMessage.value = "この内容は共有できません";
         return false;
       }
 
@@ -113,13 +113,13 @@ export function useFileHandling() {
       return true;
     } catch (error) {
       // ユーザーがキャンセルした場合はエラーとしない
-      if (error instanceof Error && error.name === 'AbortError') {
+      if (error instanceof Error && error.name === "AbortError") {
         return false;
       }
-      
+
       // その他のエラー
-      errorMessage.value = '共有中にエラーが発生しました';
-      console.error('共有エラー:', error);
+      errorMessage.value = "共有中にエラーが発生しました";
+      console.error("共有エラー:", error);
       return false;
     }
   };
@@ -131,10 +131,10 @@ export function useFileHandling() {
   const captureFromCamera = (): Promise<string | null> => {
     return new Promise((resolve, reject) => {
       // 入力要素を作成
-      const input = document.createElement('input');
-      input.type = 'file';
-      input.accept = 'image/*';
-      input.capture = 'environment'; // 背面カメラを使用
+      const input = document.createElement("input");
+      input.type = "file";
+      input.accept = "image/*";
+      input.capture = "environment"; // 背面カメラを使用
 
       // 変更イベントのハンドラ
       input.onchange = async (e) => {
@@ -164,6 +164,6 @@ export function useFileHandling() {
     loadImageFile,
     downloadImage,
     shareImage,
-    captureFromCamera
+    captureFromCamera,
   };
 }

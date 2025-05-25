@@ -1,6 +1,6 @@
 <template>
   <div class="image-uploader">
-    <div 
+    <div
       class="upload-area"
       :class="{ 'drag-over': isDragOver, 'has-image': !!imagePreview }"
       @dragover.prevent="onDragOver"
@@ -23,7 +23,7 @@
           </button>
         </div>
       </div>
-      
+
       <div v-else class="image-preview-container">
         <img :src="imagePreview" alt="プレビュー" class="image-preview" />
         <div class="preview-overlay">
@@ -33,15 +33,15 @@
         </div>
       </div>
     </div>
-    
-    <input 
-      type="file" 
-      ref="fileInput" 
-      accept="image/*" 
-      class="file-input" 
-      @change="onFileSelected" 
+
+    <input
+      type="file"
+      ref="fileInput"
+      accept="image/*"
+      class="file-input"
+      @change="onFileSelected"
     />
-    
+
     <div class="upload-actions" v-if="!imagePreview">
       <button @click="openFileDialog" class="action-btn">
         <span class="icon">📁</span> 画像を選択
@@ -50,11 +50,11 @@
         <span class="icon">📷</span> カメラで撮影
       </button>
     </div>
-    
+
     <div class="upload-error" v-if="errorMessage">
       <p>{{ errorMessage }}</p>
     </div>
-    
+
     <div class="loading-overlay" v-if="isLoading">
       <div class="spinner"></div>
       <p>読み込み中...</p>
@@ -63,18 +63,23 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
-import { useFileHandling } from '../composables/useFileHandling';
-import { useEditorStore } from '../stores/editorStore';
+import { onMounted, ref } from "vue";
+import { useFileHandling } from "../composables/useFileHandling";
+import { useEditorStore } from "../stores/editorStore";
 
 // イベント
-const emit = defineEmits(['image-loaded', 'image-cleared']);
+const emit = defineEmits(["image-loaded", "image-cleared"]);
 
 // ストア
 const store = useEditorStore();
 
 // コンポーザブル
-const { loadImageFile, captureFromCamera: captureImage, isLoading, errorMessage } = useFileHandling();
+const {
+  loadImageFile,
+  captureFromCamera: captureImage,
+  isLoading,
+  errorMessage,
+} = useFileHandling();
 
 // ファイル入力参照
 const fileInput = ref<HTMLInputElement | null>(null);
@@ -91,8 +96,11 @@ const isMobile = ref(false);
 // マウント時の処理
 onMounted(() => {
   // モバイル判定
-  isMobile.value = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-  
+  isMobile.value =
+    /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+      navigator.userAgent,
+    );
+
   // 既存の背景画像があれば設定
   if (store.backgroundImage) {
     imagePreview.value = store.backgroundImage;
@@ -113,56 +121,57 @@ const onFileSelected = async (event: Event) => {
     try {
       const file = target.files[0];
       const dataUrl = await loadImageFile(file);
-      
+
       // プレビューを設定
       imagePreview.value = dataUrl;
-      
+
       // ストアに背景画像を設定
       store.setBackgroundImage(dataUrl);
-      
+
       // イベント発火
-      emit('image-loaded', dataUrl);
+      emit("image-loaded", dataUrl);
 
       // ファイル入力をリセット
       if (fileInput.value) {
-        fileInput.value.value = '';
+        fileInput.value.value = "";
       }
-    } catch (error: any) {
-      console.error('ファイル読み込みエラー:', error);
-      errorMessage.value = error.message || 'ファイルの読み込みに失敗しました';
+    } catch (error: unknown) {
+      console.error("ファイル読み込みエラー:", error);
+      errorMessage.value = (error as Error).message
+        || "ファイルの読み込みに失敗しました";
     }
   }
 };
 
 // ドラッグオーバー時の処理
-const onDragOver = (event: DragEvent) => {
+const onDragOver = () => {
   isDragOver.value = true;
 };
 
 // ドラッグリーブ時の処理
-const onDragLeave = (event: DragEvent) => {
+const onDragLeave = () => {
   isDragOver.value = false;
 };
 
 // ドロップ時の処理
 const onDrop = async (event: DragEvent) => {
   isDragOver.value = false;
-  
+
   if (event.dataTransfer?.files && event.dataTransfer.files.length > 0) {
     try {
       const file = event.dataTransfer.files[0];
       const dataUrl = await loadImageFile(file);
-      
+
       // プレビューを設定
       imagePreview.value = dataUrl;
-      
+
       // ストアに背景画像を設定
       store.setBackgroundImage(dataUrl);
-      
+
       // イベント発火
-      emit('image-loaded', dataUrl);
+      emit("image-loaded", dataUrl);
     } catch (error) {
-      console.error('ファイル読み込みエラー:', error);
+      console.error("ファイル読み込みエラー:", error);
     }
   }
 };
@@ -174,15 +183,15 @@ const captureFromCamera = async () => {
     if (dataUrl) {
       // プレビューを設定
       imagePreview.value = dataUrl;
-      
+
       // ストアに背景画像を設定
       store.setBackgroundImage(dataUrl);
-      
+
       // イベント発火
-      emit('image-loaded', dataUrl);
+      emit("image-loaded", dataUrl);
     }
   } catch (error) {
-    console.error('カメラキャプチャエラー:', error);
+    console.error("カメラキャプチャエラー:", error);
   }
 };
 
@@ -190,9 +199,9 @@ const captureFromCamera = async () => {
 const clearImage = () => {
   imagePreview.value = null;
   store.setBackgroundImage(null);
-  
+
   // イベント発火
-  emit('image-cleared');
+  emit("image-cleared");
 };
 </script>
 

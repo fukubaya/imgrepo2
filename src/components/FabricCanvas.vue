@@ -8,22 +8,52 @@
       <button @click="addText" title="テキスト追加" class="toolbar-btn">
         <span class="icon">T</span>
       </button>
-      <button @click="deleteSelected" title="選択オブジェクト削除" :disabled="!hasSelection" class="toolbar-btn">
+      <button
+        @click="deleteSelected"
+        title="選択オブジェクト削除"
+        :disabled="!hasSelection"
+        class="toolbar-btn"
+      >
         <span class="icon">🗑</span>
       </button>
-      <button @click="duplicateSelected" title="選択オブジェクト複製" :disabled="!hasSelection" class="toolbar-btn">
+      <button
+        @click="duplicateSelected"
+        title="選択オブジェクト複製"
+        :disabled="!hasSelection"
+        class="toolbar-btn"
+      >
         <span class="icon">+</span>
       </button>
-      <button @click="bringToFront" title="最前面へ" :disabled="!hasSelection" class="toolbar-btn">
+      <button
+        @click="bringToFront"
+        title="最前面へ"
+        :disabled="!hasSelection"
+        class="toolbar-btn"
+      >
         <span class="icon">↑↑</span>
       </button>
-      <button @click="sendToBack" title="最背面へ" :disabled="!hasSelection" class="toolbar-btn">
+      <button
+        @click="sendToBack"
+        title="最背面へ"
+        :disabled="!hasSelection"
+        class="toolbar-btn"
+      >
         <span class="icon">↓↓</span>
       </button>
-      <button @click="undo" title="元に戻す" :disabled="!canUndo" class="toolbar-btn">
+      <button
+        @click="undo"
+        title="元に戻す"
+        :disabled="!canUndo"
+        class="toolbar-btn"
+      >
         <span class="icon">↩</span>
       </button>
-      <button @click="redo" title="やり直し" :disabled="!canRedo" class="toolbar-btn">
+      <button
+        @click="redo"
+        title="やり直し"
+        :disabled="!canRedo"
+        class="toolbar-btn"
+      >
         <span class="icon">↪</span>
       </button>
     </div>
@@ -31,25 +61,29 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed, watch } from 'vue';
-import { useEditorStore } from '../stores/editorStore';
-import { useFabricCanvas } from '../composables/useFabricCanvas';
-import { useFabricText } from '../composables/useFabricText';
+import { computed, onMounted, ref, watch } from "vue";
+import { useFabricCanvas } from "../composables/useFabricCanvas";
+import { useFabricText } from "../composables/useFabricText";
+import { useEditorStore } from "../stores/editorStore";
 
 // プロパティ
 const props = defineProps({
   width: {
     type: Number,
-    default: 800
+    default: 800,
   },
   height: {
     type: Number,
-    default: 600
-  }
+    default: 600,
+  },
 });
 
 // イベント
-const emit = defineEmits(['canvas-ready', 'object-selected', 'object-modified']);
+const emit = defineEmits([
+  "canvas-ready",
+  "object-selected",
+  "object-modified",
+]);
 
 // キャンバス要素の参照
 const canvasEl = ref<HTMLCanvasElement | null>(null);
@@ -82,14 +116,14 @@ onMounted(() => {
       store.setCanvas(canvas);
 
       // イベントリスナーの設定
-      canvas.on('selection:created', handleSelection);
-      canvas.on('selection:updated', handleSelection);
-      canvas.on('selection:cleared', () => store.setSelectedObject(null));
-      canvas.on('object:modified', () => {
+      canvas.on("selection:created", handleSelection);
+      canvas.on("selection:updated", handleSelection);
+      canvas.on("selection:cleared", () => store.setSelectedObject(null));
+      canvas.on("object:modified", () => {
         store.saveState();
-        emit('object-modified');
+        emit("object-modified");
       });
-      canvas.on('text:changed', () => store.saveState());
+      canvas.on("text:changed", () => store.saveState());
 
       // 背景画像の設定（もし存在すれば）
       if (store.backgroundImage) {
@@ -100,31 +134,33 @@ onMounted(() => {
       store.saveState();
 
       // キャンバス準備完了イベントを発火
-      emit('canvas-ready', canvas);
+      emit("canvas-ready", canvas);
     } catch (error) {
-      console.error('キャンバス初期化エラー:', error);
+      console.error("キャンバス初期化エラー:", error);
     }
   }
 });
 
 // 選択オブジェクトの処理
-const handleSelection = (e: any) => {
+import { IEvent } from "fabric";
+
+const handleSelection = (e: IEvent) => {
   const selected = e.selected?.[0] || e.target;
   store.setSelectedObject(selected);
-  emit('object-selected', selected);
+  emit("object-selected", selected);
 };
 
 // 新しいテキストの追加
 const addText = () => {
   if (!store.canvas) return;
-  
+
   // キャンバスの中央に新しいテキストを作成
-  const text = createText('テキストを入力', {
+  const text = createText("テキストを入力", {
     left: store.canvas.width! / 2,
     top: store.canvas.height! / 2,
-    fontFamily: 'Arial',
+    fontFamily: "Arial",
     fontSize: 30,
-    fill: '#000000',
+    fill: "#000000",
   });
 
   store.canvas.add(text);
@@ -169,16 +205,19 @@ const redo = () => {
 watch(() => store.backgroundImage, async (newImage) => {
   if (store.canvas) {
     if (newImage) {
-      console.log('背景画像を設定します:', newImage);
+      console.log("背景画像を設定します:", newImage);
       try {
         await setBackgroundImage(store.canvas, newImage);
         store.saveState();
       } catch (error) {
-        console.error('背景画像の設定に失敗しました:', error);
+        console.error("背景画像の設定に失敗しました:", error);
       }
     } else {
       if (store.canvas) {
-        store.canvas.setBackgroundImage(null, store.canvas.renderAll.bind(store.canvas));
+        store.canvas.setBackgroundImage(
+          null,
+          store.canvas.renderAll.bind(store.canvas),
+        );
         store.saveState();
       }
     }
@@ -193,7 +232,7 @@ defineExpose({
   bringToFront,
   sendToBack,
   undo,
-  redo
+  redo,
 });
 </script>
 

@@ -1,4 +1,4 @@
-import { registerSW } from 'virtual:pwa-register';
+import { registerSW } from "virtual:pwa-register";
 
 // Service Workerの更新間隔（1時間）
 const intervalMS = 60 * 60 * 1000;
@@ -8,13 +8,13 @@ export const updateSW = registerSW({
   // 更新が必要な場合のコールバック
   onNeedRefresh() {
     // 更新が必要なことをコンソールに表示
-    console.log('新しいバージョンが利用可能です！');
+    console.log("新しいバージョンが利用可能です！");
     // ここでUIに通知を表示することもできます
   },
   // オフライン準備完了時のコールバック
   onOfflineReady() {
     // オフライン準備完了をコンソールに表示
-    console.log('アプリケーションはオフラインで使用できます');
+    console.log("アプリケーションはオフラインで使用できます");
     // ここでUIに通知を表示することもできます
   },
   // 定期的に更新をチェック
@@ -26,11 +26,11 @@ export const updateSW = registerSW({
           r.update();
         }
       };
-      
+
       // 定期的に更新をチェック
       setInterval(checkUpdate, intervalMS);
     }
-  }
+  },
 });
 
 /**

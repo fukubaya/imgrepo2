@@ -1,27 +1,9 @@
 // Fabric.jsの型定義を簡略化
-import { IText } from 'fabric';
-
-export interface FabricCanvas {
-  width?: number;
-  height?: number;
-  add: (object: any) => void;
-  remove: (object: any) => void;
-  clear: () => void;
-  setActiveObject: (object: any) => void;
-  getActiveObject: () => any;
-  discardActiveObject: () => void;
-  requestRenderAll: () => void;
-  loadFromJSON: (json: string, callback?: () => void) => void;
-  toJSON: (propertiesToInclude?: string[]) => any;
-  toDataURL: (options?: any) => string;
-  [key: string]: any;
-}
-
-
+import { Canvas, IText } from "fabric";
 
 // エディタの状態
 export interface EditorState {
-  canvas: FabricCanvas | null;
+  canvas: Canvas | null;
   backgroundImage: string | null;
   selectedObject: IText | null;
   isEditing: boolean;
@@ -54,4 +36,16 @@ export interface TextEffectPreset {
 export interface HistoryState {
   undoStack: string[];
   redoStack: string[];
+}
+
+/**
+ * @see https://stackoverflow.com/questions/51503754/typescript-type-beforeinstallpromptevent
+ */
+export interface BeforeInstallPromptEvent extends Event {
+  readonly platforms: Array<string>;
+  readonly userChoice: Promise<{
+    outcome: "accepted" | "dismissed";
+    platform: string;
+  }>;
+  prompt(): Promise<void>;
 }
