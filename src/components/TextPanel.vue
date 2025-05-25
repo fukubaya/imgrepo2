@@ -29,23 +29,6 @@
           </select>
         </div>
 
-        <!-- フォントサイズ -->
-        <div class="style-section">
-          <label for="text-size">サイズ:</label>
-          <div class="slider-with-value">
-            <input
-              type="range"
-              id="text-size"
-              v-model.number="fontSize"
-              min="8"
-              max="120"
-              @input="updateStyle"
-              class="style-slider"
-            />
-            <span class="value-display">{{ fontSize }}px</span>
-          </div>
-        </div>
-
         <!-- テキスト色 -->
         <div class="style-section">
           <label for="text-color">色:</label>

@@ -243,7 +243,6 @@ defineExpose({
 .fabric-canvas-container {
   position: relative;
   height: 100%;
-  min-height: 400px;
   background-color: #f5f5f5;
   border: 1px solid #ddd;
   overflow: hidden;

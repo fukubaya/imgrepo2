@@ -8,7 +8,7 @@
           class="action-btn export-btn"
           :disabled="!hasBackgroundImage"
         >
-          <span class="icon">💾</span> 保存
+          <span class="icon">💾</span>
         </button>
         <button
           v-if="isMobile && canShare"
@@ -16,7 +16,14 @@
           class="action-btn share-btn"
           :disabled="!hasBackgroundImage"
         >
-          <span class="icon">📤</span> 共有
+          <span class="icon">📤</span>
+        </button>
+        <button
+          v-if="hasBackgroundImage"
+          @click="clearImage"
+          class="action-btn"
+        >
+          <span class="icon">❌</span>
         </button>
       </div>
     </header>
@@ -37,12 +44,6 @@
       </div>
 
       <div class="sidebar" :class="{ 'has-selection': isTextSelected }">
-        <div v-if="hasBackgroundImage" class="sidebar-section">
-          <button @click="clearImage" class="sidebar-btn">
-            <span class="icon">🖼️</span> 画像を変更
-          </button>
-        </div>
-
         <div class="sidebar-section">
           <TextPanel />
         </div>
@@ -141,7 +142,7 @@ const exportImage = () => {
   if (!store.canvas) return;
 
   // キャンバスをエクスポート
-  const dataUrl = exportCanvas(store.canvas, "jpeg");
+  const dataUrl = exportCanvas(store.canvas, { format: "jpeg" });
   if (dataUrl) {
     // ファイル名の生成（現在日時を含む）
     const now = new Date();
@@ -162,7 +163,7 @@ const shareImage = async () => {
   if (!store.canvas) return;
 
   // キャンバスをエクスポート
-  const dataUrl = await exportCanvas(store.canvas, "jpeg");
+  const dataUrl = await exportCanvas(store.canvas, { format: "jpeg" });
   if (dataUrl) {
     // ファイル名の生成
     const filename = `画像テキストエディタ_${
@@ -281,7 +282,6 @@ button {
 
 .editor-container {
   flex: 1;
-  min-height: 400px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -290,7 +290,6 @@ button {
 .upload-container, .canvas-container {
   width: 100%;
   height: 100%;
-  min-height: 400px;
 }
 .canvas-container {
   display: flex;
@@ -308,24 +307,6 @@ button {
 
 .sidebar-section {
   margin-bottom: 20px;
-}
-
-.sidebar-btn {
-  width: 100%;
-  padding: 10px;
-  background-color: var(--card-background);
-  border: 1px solid var(--border-color);
-  border-radius: 4px;
-  font-size: 14px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 5px;
-  transition: all 0.2s;
-}
-
-.sidebar-btn:hover {
-  background-color: #f0f0f0;
 }
 
 .app-footer {
