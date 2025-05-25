@@ -12,6 +12,22 @@
       >
         <span class="icon">📋T</span>
       </button>
+
+      <!-- 貼り付けフォーム -->
+      <div v-if="showPasteForm" class="paste-form-overlay">
+        <div class="paste-form-modal">
+          <h3>テキストをここに貼り付け</h3>
+          <textarea
+            v-model="pasteTextContent"
+            @paste="handlePaste"
+            placeholder="ここにテキストをペーストしてください..."
+            rows="10"
+          ></textarea>
+          <div class="form-actions">
+            <button @click="showPasteForm = false" class="btn-secondary">キャンセル</button>
+          </div>
+        </div>
+      </div>
       <button @click="addText" title="テキスト追加" class="toolbar-btn">
         <span class="icon">T</span>
       </button>
@@ -72,6 +88,10 @@ import { computed, onMounted, ref, watch } from "vue";
 import { useFabricCanvas } from "../composables/useFabricCanvas";
 import { useFabricText } from "../composables/useFabricText";
 import { useEditorStore } from "../stores/editorStore";
+
+// 状態
+const showPasteForm = ref(false);
+const pasteTextContent = ref("");
 
 // プロパティ
 const props = defineProps({
@@ -156,36 +176,49 @@ const handleSelection = (e: any) => {
   emit("object-selected", selected);
 };
 
-// クリップボードからテキストを追加
-const addTextFromClipboard = async () => {
+// クリップボードからテキストを追加（フォーム表示）
+const addTextFromClipboard = () => {
+  showPasteForm.value = true;
+  pasteTextContent.value = ""; // フォームを開く際に内容をクリア
+};
+
+// 貼り付けイベントハンドラ
+const handlePaste = (event: ClipboardEvent) => {
+  const clipboardData = event.clipboardData || (window as any).clipboardData;
+  if (clipboardData) {
+    pasteTextContent.value = clipboardData.getData("text");
+    addTextFromPastedForm(); // 貼り付け時に自動でテキストを追加
+  }
+};
+
+// フォームからテキストを追加
+const addTextFromPastedForm = () => {
   if (!store.canvas) return;
 
-  try {
-    const clipboardText = await navigator.clipboard.readText();
-    const textContent = clipboardText || "テキストを入力";
+  const textContent = pasteTextContent.value || "テキストを入力";
 
-    // キャンバスの中央に新しいテキストを作成
-    const scale = store.canvas.getZoom();
-    const text = createText(textContent, {
-      left: store.canvas.width! / 2,
-      top: store.canvas.height! / 2,
-      fontFamily: "Arial",
-      fontSize: 30,
-      fill: "#000000",
-      scaleX: 1 / scale,
-      scaleY: 1 / scale,
-    });
+  // キャンバスの中央に新しいテキストを作成
+  const scale = store.canvas.getZoom();
+  const text = createText(textContent, {
+    left: store.canvas.width! / 2,
+    top: store.canvas.height! / 2,
+    fontFamily: "Arial",
+    fontSize: 30,
+    fill: "#000000",
+    scaleX: 1 / scale,
+    scaleY: 1 / scale,
+  });
 
-    store.canvas.add(text);
-    store.canvas.setActiveObject(text);
-    store.canvas.requestRenderAll();
+  store.canvas.add(text);
+  store.canvas.setActiveObject(text);
+  store.canvas.requestRenderAll();
 
-    // 履歴に保存
-    store.saveState();
-  } catch (error) {
-    console.error("クリップボードからのテキスト追加エラー:", error);
-    addText(); // クリップボードが利用できない場合は、通常のテキスト追加処理を実行
-  }
+  // 履歴に保存
+  store.saveState();
+
+  // フォームを閉じる
+  showPasteForm.value = false;
+  pasteTextContent.value = "";
 };
 
 // 新しいテキストの追加
@@ -355,5 +388,81 @@ defineExpose({
   .icon {
     font-size: 16px;
   }
+}
+
+/* 貼り付けフォームのスタイル */
+.paste-form-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 200; /* ツールバーより前面に */
+}
+
+.paste-form-modal {
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+  width: 90%;
+  max-width: 500px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.paste-form-modal h3 {
+  margin-top: 0;
+  color: #333;
+  font-size: 1.2em;
+}
+
+.paste-form-modal textarea {
+  width: calc(100% - 20px); /* paddingを考慮 */
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 1em;
+  resize: vertical;
+  min-height: 100px;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.btn-primary,
+.btn-secondary {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 1em;
+  transition: background-color 0.2s;
+}
+
+.btn-primary {
+  background-color: #007bff;
+  color: white;
+}
+
+.btn-primary:hover {
+  background-color: #0056b3;
+}
+
+.btn-secondary {
+  background-color: #6c757d;
+  color: white;
+}
+
+.btn-secondary:hover {
+  background-color: #5a6268;
 }
 </style>
