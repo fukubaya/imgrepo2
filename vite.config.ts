@@ -1,9 +1,16 @@
+import fs from "fs";
 import vue from "@vitejs/plugin-vue";
 import { defineConfig } from "vite";
 import { VitePWA } from "vite-plugin-pwa";
 
 // https://vite.dev/config/
 export default defineConfig({
+  server: {
+    https: {
+      key: fs.readFileSync("server-key.pem"),
+      cert: fs.readFileSync("server-cert.pem"),
+    }
+  },
   plugins: [
     vue(),
     VitePWA({
