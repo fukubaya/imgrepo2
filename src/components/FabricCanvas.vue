@@ -155,12 +155,15 @@ const addText = () => {
   if (!store.canvas) return;
 
   // キャンバスの中央に新しいテキストを作成
+  const scale = store.canvas.getZoom();
   const text = createText("テキストを入力", {
     left: store.canvas.width! / 2,
     top: store.canvas.height! / 2,
     fontFamily: "Arial",
     fontSize: 30,
     fill: "#000000",
+    scaleX: 1 / scale,
+    scaleY: 1 / scale,
   });
 
   store.canvas.add(text);

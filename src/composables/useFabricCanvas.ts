@@ -102,14 +102,6 @@ export function useFabricCanvas() {
       elHeight = containerWidth * (imgHeight / imgWidth);
     }
 
-    fCanvas.upperCanvasEl.style.width = elWidth + "px";
-    fCanvas.upperCanvasEl.style.height = elHeight + "px";
-    fCanvas.upperCanvasEl.setAttribute("width", elWidth.toString());
-    fCanvas.upperCanvasEl.setAttribute("height", elHeight.toString());
-    fCanvas.lowerCanvasEl.style.width = elWidth + "px";
-    fCanvas.lowerCanvasEl.style.height = elHeight + "px";
-    fCanvas.lowerCanvasEl.setAttribute("width", elWidth.toString());
-    fCanvas.lowerCanvasEl.setAttribute("height", elHeight.toString());
     fCanvas.wrapperEl.style.width = elWidth + "px";
     fCanvas.wrapperEl.style.height = elHeight + "px";
 
