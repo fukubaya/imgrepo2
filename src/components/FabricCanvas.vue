@@ -33,7 +33,11 @@
         <span class="icon">📋T</span>
       </button>
 
-      <button @click="addText" title="テキスト追加" class="toolbar-btn">
+      <button
+        @click="addTextFromButton"
+        title="テキスト追加"
+        class="toolbar-btn"
+      >
         <span class="icon">T</span>
       </button>
       <button
@@ -199,49 +203,51 @@ const handlePaste = (event: ClipboardEvent) => {
 
 // フォームからテキストを追加
 const addTextFromPastedForm = () => {
-  if (!store.canvas) return;
-
-  const textContent = pasteTextContent.value || "テキストを入力";
-
-  // キャンバスの中央に新しいテキストを作成
-  const scale = store.canvas.getZoom();
-  const text = createText(textContent, {
-    left: store.canvas.width! / 2,
-    top: store.canvas.height! / 2,
-    fontFamily: "Arial",
-    fontSize: 30,
-    fill: "#000000",
-    scaleX: 1 / scale,
-    scaleY: 1 / scale,
-  });
-
-  store.canvas.add(text);
-  store.canvas.setActiveObject(text);
-  store.canvas.requestRenderAll();
-
-  // 履歴に保存
-  store.saveState();
-
+  addText(pasteTextContent.value || "テキストを入力");
   // フォームを閉じる
   showPasteForm.value = false;
   pasteTextContent.value = "";
 };
 
+// ボタンからのテキスト追加
+const addTextFromButton = () => {
+  // ボタンからのテキスト追加
+  addText("テキストを入力");
+};
+
 // 新しいテキストの追加
-const addText = () => {
+const addText = (t: string = "") => {
   if (!store.canvas) return;
 
   // キャンバスの中央に新しいテキストを作成
-  const scale = store.canvas.getZoom();
-  const text = createText("テキストを入力", {
-    left: store.canvas.width! / 2,
-    top: store.canvas.height! / 2,
+  const scale = 1 / store.canvas.getZoom();
+  const text = createText(t || "テキストを入力", {
+    left: 0,
+    top: 0,
     fontFamily: "Arial",
     fontSize: 30,
     fill: "#000000",
-    scaleX: 1 / scale,
-    scaleY: 1 / scale,
+    scaleX: scale,
+    scaleY: scale,
   });
+
+  // キャンバスのサイズの90%を超える場合は縮小する
+  const upperRate = 0.9;
+  if (
+    text.width * scale > store.canvas.width * upperRate
+    || text.height * scale > store.canvas.height * upperRate
+  ) {
+    const r = Math.min(
+      store.canvas.width * upperRate / (text.width * scale),
+      store.canvas.height * upperRate / (text.height * scale),
+    );
+    text.scaleX = r * scale;
+    text.scaleY = r * scale;
+  }
+
+  // テキストの位置を中央に設定
+  text.top = (store.canvas.height - text.height * text.scaleY) / 2;
+  text.left = (store.canvas.width - text.width * text.scaleX) / 2;
 
   store.canvas.add(text);
   store.canvas.setActiveObject(text);
