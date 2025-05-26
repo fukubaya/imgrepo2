@@ -3,6 +3,26 @@
     <!-- キャンバス要素 -->
     <canvas ref="canvasEl" class="fabric-canvas"></canvas>
 
+    <teleport to="#paste-form" v-if="showPasteForm" class="paste-form-overlay">
+      <div class="paste-form-modal">
+        <h3>テキストをここに貼り付け</h3>
+        <textarea
+          v-model="pasteTextContent"
+          @paste="handlePaste"
+          placeholder="ここにテキストをペーストしてください..."
+          rows="1"
+        ></textarea>
+        <div class="form-actions">
+          <button @click="showPasteForm = false" class="btn-secondary">
+            キャンセル
+          </button>
+        </div>
+      </div>
+    </teleport>
+
+    <!-- 貼り付けフォーム -->
+    <div id="paste-form" />
+
     <!-- ツールバー -->
     <div class="canvas-toolbar">
       <button
@@ -13,21 +33,6 @@
         <span class="icon">📋T</span>
       </button>
 
-      <!-- 貼り付けフォーム -->
-      <div v-if="showPasteForm" class="paste-form-overlay">
-        <div class="paste-form-modal">
-          <h3>テキストをここに貼り付け</h3>
-          <textarea
-            v-model="pasteTextContent"
-            @paste="handlePaste"
-            placeholder="ここにテキストをペーストしてください..."
-            rows="10"
-          ></textarea>
-          <div class="form-actions">
-            <button @click="showPasteForm = false" class="btn-secondary">キャンセル</button>
-          </div>
-        </div>
-      </div>
       <button @click="addText" title="テキスト追加" class="toolbar-btn">
         <span class="icon">T</span>
       </button>
@@ -184,6 +189,7 @@ const addTextFromClipboard = () => {
 
 // 貼り付けイベントハンドラ
 const handlePaste = (event: ClipboardEvent) => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const clipboardData = event.clipboardData || (window as any).clipboardData;
   if (clipboardData) {
     pasteTextContent.value = clipboardData.getData("text");
@@ -409,8 +415,6 @@ defineExpose({
   padding: 20px;
   border-radius: 8px;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-  width: 90%;
-  max-width: 500px;
   display: flex;
   flex-direction: column;
   gap: 15px;
@@ -429,7 +433,14 @@ defineExpose({
   border-radius: 4px;
   font-size: 1em;
   resize: vertical;
-  min-height: 100px;
+}
+
+#paste-form {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 90%;
 }
 
 .form-actions {

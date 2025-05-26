@@ -473,7 +473,6 @@ const applyPreset = (presetName: string) => {
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
   overflow: hidden;
   width: 100%;
-  max-width: 300px;
 }
 
 .panel-disabled {
