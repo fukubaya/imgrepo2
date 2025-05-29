@@ -69,6 +69,7 @@ import InstallPrompt from "./components/InstallPrompt.vue";
 import TextPanel from "./components/TextPanel.vue";
 import { useFabricCanvas } from "./composables/useFabricCanvas";
 import { useFileHandling } from "./composables/useFileHandling";
+import { useFont } from "./composables/useFont";
 import { usePwa } from "./composables/usePwa";
 import { useEditorStore } from "./stores/editorStore";
 
@@ -79,6 +80,7 @@ const store = useEditorStore();
 const { downloadImage, shareImage: shareImageFile } = useFileHandling();
 const { isOffline } = usePwa();
 const { exportCanvas } = useFabricCanvas();
+const { loadFont } = useFont();
 
 // コンポーネント参照
 const editorEl = ref<HTMLElement | null>(null);
@@ -110,6 +112,13 @@ onMounted(() => {
     /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
       navigator.userAgent,
     );
+
+  // fontの読み込み
+  loadFont(document, {
+    kitId: import.meta.env.VITE_ADOBE_KITID,
+    scriptTimeout: 3000,
+    async: true,
+  });
 });
 
 // 画像読み込み時の処理
@@ -231,6 +240,7 @@ button {
 .app-title {
   font-size: 20px;
   font-weight: 600;
+  font-family: -apple-system, 'Toppan Bunkyu Midashi Gothic Extrabold';
 }
 
 .app-actions {
