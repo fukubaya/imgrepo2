@@ -1,3 +1,4 @@
+import { markRaw } from "vue";
 import { defineStore } from "pinia";
 import type { EditorState, HistoryState } from "../types";
 
@@ -86,9 +87,10 @@ export const useEditorStore = defineStore("editor", {
           left: (this.selectedObject?.left || 0) + 20,
           top: (this.selectedObject?.top || 0) + 20,
           evented: true,
+          editable: true,
         });
 
-        this.canvas?.add(cloned);
+        this.canvas?.add(markRaw(cloned));
         this.canvas?.setActiveObject(cloned);
         this.canvas?.requestRenderAll();
 
@@ -104,7 +106,7 @@ export const useEditorStore = defineStore("editor", {
     bringForward() {
       if (!this.canvas || !this.selectedObject) return;
 
-      this.canvas.bringForward(this.selectedObject);
+      this.canvas.bringObjectForward(this.selectedObject);
       this.canvas.requestRenderAll();
 
       // 履歴に保存
@@ -115,7 +117,7 @@ export const useEditorStore = defineStore("editor", {
     sendBackward() {
       if (!this.canvas || !this.selectedObject) return;
 
-      this.canvas.sendBackward(this.selectedObject);
+      this.canvas.sendObjectBackwards(this.selectedObject);
       this.canvas.requestRenderAll();
 
       // 履歴に保存
@@ -126,7 +128,7 @@ export const useEditorStore = defineStore("editor", {
     bringToFront() {
       if (!this.canvas || !this.selectedObject) return;
 
-      this.canvas.bringToFront(this.selectedObject);
+      this.canvas.bringObjectToFront(this.selectedObject);
       this.canvas.requestRenderAll();
 
       // 履歴に保存
@@ -137,7 +139,7 @@ export const useEditorStore = defineStore("editor", {
     sendToBack() {
       if (!this.canvas || !this.selectedObject) return;
 
-      this.canvas.sendToBack(this.selectedObject);
+      this.canvas.sendObjectToBack(this.selectedObject);
       this.canvas.requestRenderAll();
 
       // 履歴に保存
