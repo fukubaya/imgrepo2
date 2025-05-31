@@ -88,13 +88,28 @@ export function useFabricCanvas() {
     // 画像のアスペクト比を維持しながらキャンバスのサイズを調整
     const scaleX = containerWidth / imgWidth;
     const scaleY = containerHeight / imgHeight;
-    const scale = Math.min(scaleX, scaleY);
+    let scale = Math.min(scaleX, scaleY);
     fCanvas.width = imgWidth;
     fCanvas.height = imgHeight;
 
+    // キャンバスのラッパー要素のサイズを設定
     let elWidth;
     let elHeight;
-    if (scaleX > scaleY) {
+    // アスペクト比に基づいてキャンバスのサイズを設定
+    if (containerWidth <= 600) {
+      // スマートフォンや小さい画面の場合、幅を優先
+      elWidth = containerWidth;
+      elHeight = containerWidth * (imgHeight / imgWidth);
+      scale = scaleX;
+      fCanvas.wrapperEl.parentElement!.style.width = elWidth + "px";
+      fCanvas.wrapperEl.parentElement!.style.height = elHeight + "px";
+
+      fCanvas.wrapperEl.parentElement!.parentElement!.style.width = elWidth + "px";
+      fCanvas.wrapperEl.parentElement!.parentElement!.style.height = elHeight + "px";
+
+      fCanvas.wrapperEl.parentElement!.parentElement!.parentElement!.style.width = elWidth + "px";
+      fCanvas.wrapperEl.parentElement!.parentElement!.parentElement!.style.height = elHeight + "px";
+    } else if (scaleX > scaleY) {
       elWidth = containerHeight * (imgWidth / imgHeight);
       elHeight = containerHeight;
     } else {
@@ -105,7 +120,6 @@ export function useFabricCanvas() {
     fCanvas.wrapperEl.style.width = elWidth + "px";
     fCanvas.wrapperEl.style.height = elHeight + "px";
 
-    fCanvas.requestRenderAll();
     return scale;
   };
 

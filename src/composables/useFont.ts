@@ -5,9 +5,9 @@ export function useFont() {
         h.className = h.className.replace(/\bwf-loading\b/g, "")
           + " wf-inactive";
       }, config.scriptTimeout),
-      tk = d.createElement("script"),      
+      tk = d.createElement("script"),
       s = d.getElementsByTagName("script")[0];
-    let f=false, a;
+    let f = false, a;
     h.className += " wf-loading";
     tk.src = "https://use.typekit.net/" + config.kitId + ".js";
     tk.async = true;

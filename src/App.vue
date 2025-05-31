@@ -29,7 +29,7 @@
     </header>
 
     <main class="app-main">
-      <div ref="editorEl" class="editor-container">
+      <div class="editor-container">
         <div v-if="!hasBackgroundImage" class="upload-container">
           <ImageUploader @image-loaded="onImageLoaded" />
         </div>
@@ -37,8 +37,8 @@
           <FabricCanvas
             ref="canvasRef"
             @object-selected="onObjectSelected"
-            :width="elWidth"
-            :height="elHeight"
+            :width="1920"
+            :height="1080"
           />
         </div>
       </div>
@@ -83,19 +83,12 @@ const { exportCanvas } = useFabricCanvas();
 const { loadFont } = useFont();
 
 // コンポーネント参照
-const editorEl = ref<HTMLElement | null>(null);
 const canvasRef = ref<InstanceType<typeof FabricCanvas> | null>(null);
 const installPromptRef = ref<InstanceType<typeof InstallPrompt> | null>(null);
 
 // 計算プロパティ
 const hasBackgroundImage = computed(() => store.hasBackgroundImage);
 const isTextSelected = computed(() => store.isTextSelected);
-const elWidth = computed(() =>
-  editorEl.value ? editorEl.value.clientWidth : 800
-);
-const elHeight = computed(() =>
-  editorEl.value ? editorEl.value.clientHeight : 600
-);
 
 // モバイル判定
 const isMobile = ref(false);
@@ -375,7 +368,7 @@ button {
   }
   
   .app-main {
-    padding: 10px;
+    padding: 0;
   }
   
   .app-footer {
