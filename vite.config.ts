@@ -15,7 +15,7 @@ export default defineConfig({
     vue(),
     VitePWA({
       registerType: "autoUpdate",
-      includeAssets: ["favicon.ico", "apple-touch-icon.png", "masked-icon.svg"],
+      includeAssets: ["pwa-192x192.png", "pwa-512x512"],
       manifest: {
         name: "画像テキストエディタ",
         short_name: "画像エディタ",
@@ -27,17 +27,6 @@ export default defineConfig({
             sizes: "192x192",
             type: "image/png",
           },
-          {
-            src: "pwa-512x512.png",
-            sizes: "512x512",
-            type: "image/png",
-          },
-          {
-            src: "pwa-512x512.png",
-            sizes: "512x512",
-            type: "image/png",
-            purpose: "any maskable",
-          },
         ],
       },
       workbox: {
@@ -47,6 +36,17 @@ export default defineConfig({
             handler: "CacheFirst",
             options: {
               cacheName: "google-fonts-cache",
+              expiration: {
+                maxEntries: 10,
+                maxAgeSeconds: 60 * 60 * 24 * 365, // 1年
+              },
+            },
+          },
+          {
+            urlPattern: /^https:\/\/use\.typekit\.net\/.*/i,
+            handler: "CacheFirst",
+            options: {
+              cacheName: "typekit-cache",
               expiration: {
                 maxEntries: 10,
                 maxAgeSeconds: 60 * 60 * 24 * 365, // 1年
