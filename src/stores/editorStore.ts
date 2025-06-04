@@ -1,5 +1,5 @@
-import { markRaw } from "vue";
 import { defineStore } from "pinia";
+import { markRaw } from "vue";
 import type { EditorState, HistoryState } from "../types";
 
 // Fabric.jsをインポート
@@ -69,7 +69,7 @@ export const useEditorStore = defineStore("editor", {
     deleteSelectedObject() {
       if (!this.canvas || !this.selectedObject) return;
 
-      this.canvas.remove(this.selectedObject);
+      this.canvas.remove(this.selectedObject as IText);
       this.setSelectedObject(null);
       this.canvas.requestRenderAll();
 
@@ -106,7 +106,7 @@ export const useEditorStore = defineStore("editor", {
     bringForward() {
       if (!this.canvas || !this.selectedObject) return;
 
-      this.canvas.bringObjectForward(this.selectedObject);
+      this.canvas.bringObjectForward(this.selectedObject as IText);
       this.canvas.requestRenderAll();
 
       // 履歴に保存
@@ -117,7 +117,7 @@ export const useEditorStore = defineStore("editor", {
     sendBackward() {
       if (!this.canvas || !this.selectedObject) return;
 
-      this.canvas.sendObjectBackwards(this.selectedObject);
+      this.canvas.sendObjectBackwards(this.selectedObject as IText);
       this.canvas.requestRenderAll();
 
       // 履歴に保存
@@ -128,7 +128,7 @@ export const useEditorStore = defineStore("editor", {
     bringToFront() {
       if (!this.canvas || !this.selectedObject) return;
 
-      this.canvas.bringObjectToFront(this.selectedObject);
+      this.canvas.bringObjectToFront(this.selectedObject as IText);
       this.canvas.requestRenderAll();
 
       // 履歴に保存
@@ -139,7 +139,7 @@ export const useEditorStore = defineStore("editor", {
     sendToBack() {
       if (!this.canvas || !this.selectedObject) return;
 
-      this.canvas.sendObjectToBack(this.selectedObject);
+      this.canvas.sendObjectToBack(this.selectedObject as IText);
       this.canvas.requestRenderAll();
 
       // 履歴に保存
@@ -151,7 +151,7 @@ export const useEditorStore = defineStore("editor", {
       if (!this.canvas) return;
 
       // キャンバスの状態をJSON文字列として保存
-      const json = JSON.stringify(this.canvas.toJSON(["id", "selectable"]));
+      const json = JSON.stringify(this.canvas.toJSON());
 
       // 履歴スタックに追加
       this.undoStack.push(json);
@@ -170,7 +170,7 @@ export const useEditorStore = defineStore("editor", {
       if (!this.canvas || this.undoStack.length === 0) return;
 
       // 現在の状態をやり直しスタックに保存
-      const currentState = JSON.stringify(this.canvas.toJSON(["id", "selectable"]));
+      const currentState = JSON.stringify(this.canvas.toJSON());
       this.redoStack.push(currentState);
 
       // 履歴から前の状態を取得
@@ -185,7 +185,7 @@ export const useEditorStore = defineStore("editor", {
       if (!this.canvas || this.redoStack.length === 0) return;
 
       // 現在の状態を元に戻すスタックに保存
-      const currentState = JSON.stringify(this.canvas.toJSON(["id", "selectable"]));
+      const currentState = JSON.stringify(this.canvas.toJSON());
       this.undoStack.push(currentState);
 
       // やり直しスタックから状態を取得

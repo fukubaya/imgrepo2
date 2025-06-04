@@ -1,7 +1,7 @@
 import { ref } from "vue";
 
 // Fabric.jsをインポート
-import { Canvas, FabricImage, IText, type TCanvasOptions } from "fabric";
+import { Canvas, type CanvasOptions, FabricImage, IText, type TOptions } from "fabric";
 
 /**
  * Fabric.jsキャンバスを操作するためのコンポーザブル
@@ -16,7 +16,7 @@ export function useFabricCanvas() {
    * @param options キャンバスオプション
    * @returns 初期化されたキャンバス
    */
-  const initCanvas = (canvasEl: HTMLCanvasElement, options: TCanvasOptions = {}): Canvas => {
+  const initCanvas = (canvasEl: HTMLCanvasElement, options: TOptions<CanvasOptions> = {}): Canvas => {
     // Fabric.jsキャンバスの作成
     const fabricCanvas = new Canvas(canvasEl, {
       preserveObjectStacking: true, // オブジェクトの重ね順を維持

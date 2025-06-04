@@ -1,5 +1,18 @@
+interface Config {
+  kitId: string;
+  scriptTimeout?: number;
+  async: boolean;
+}
+declare global {
+  interface Window {
+    Typekit: {
+      load: (config: Config) => void;
+    };
+  }
+}
+
 export function useFont() {
-  const loadFont = function(d, config) {
+  const loadFont = function(d: Document, config: Config) {
     const h = d.documentElement,
       t = setTimeout(function() {
         h.className = h.className.replace(/\bwf-loading\b/g, "")
@@ -7,22 +20,18 @@ export function useFont() {
       }, config.scriptTimeout),
       tk = d.createElement("script"),
       s = d.getElementsByTagName("script")[0];
-    let f = false, a;
     h.className += " wf-loading";
     tk.src = "https://use.typekit.net/" + config.kitId + ".js";
     tk.async = true;
-    tk.onload = tk.onreadystatechange = function() {
-      a = this.readyState;
-      if (f || a && a != "complete" && a != "loaded") return;
-      f = true;
+    tk.onload = () => {
       clearTimeout(t);
       try {
-        Typekit.load(config);
+        (window as Window).Typekit.load(config);
       } catch (e: unknown) {
         console.log("Typekit load error:", e);
       }
     };
-    s.parentNode.insertBefore(tk, s);
+    s.parentNode?.insertBefore(tk, s);
   };
 
   return {

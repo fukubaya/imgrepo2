@@ -257,7 +257,7 @@
 </template>
 
 <script setup lang="ts">
-import { IText } from "fabric";
+import { IText, Shadow } from "fabric";
 import { computed, ref, watch } from "vue";
 import { useFabricText } from "../composables/useFabricText";
 import { AVAILABLE_FONTS } from "../constants/fonts";
@@ -390,14 +390,16 @@ const updateShadow = () => {
 
   if (hasShadow.value) {
     // Fabric.jsのShadowオブジェクトを作成
-    const shadowOptions = {
-      color: shadowColor.value,
+    const shadowOptions = new Shadow({
+      affectStroke: false,
       blur: shadowBlur.value,
+      color: shadowColor.value,
+      id: 0,
+      includeDefaultValues: true,
+      nonScaling: false,
       offsetX: shadowOffsetX.value,
       offsetY: shadowOffsetY.value,
-      affectStroke: false,
-      includeDefaultValues: true,
-    };
+    });
 
     updateTextStyle(selectedText.value, {
       shadow: shadowOptions,

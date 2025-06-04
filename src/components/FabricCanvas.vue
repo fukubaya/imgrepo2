@@ -93,6 +93,7 @@
 </template>
 
 <script setup lang="ts">
+import { Canvas } from "fabric";
 import { computed, onMounted, ref, watch } from "vue";
 import { useFabricCanvas } from "../composables/useFabricCanvas";
 import { useFabricText } from "../composables/useFabricText";
@@ -293,17 +294,15 @@ watch(() => store.backgroundImage, async (newImage) => {
     if (newImage) {
       console.log("背景画像を設定します:", newImage);
       try {
-        await setBackgroundImage(store.canvas, newImage);
+        await setBackgroundImage(store.canvas as unknown as Canvas, newImage);
         store.saveState();
       } catch (error) {
         console.error("背景画像の設定に失敗しました:", error);
       }
     } else {
       if (store.canvas) {
-        store.canvas.setBackgroundImage(
-          null,
-          store.canvas.renderAll.bind(store.canvas),
-        );
+        store.canvas.backgroundImage = undefined;
+        store.canvas.renderAll.bind(store.canvas);
         store.saveState();
       }
     }

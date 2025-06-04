@@ -62,6 +62,7 @@
 </template>
 
 <script setup lang="ts">
+import type { Canvas } from "fabric";
 import { computed, onMounted, ref } from "vue";
 import FabricCanvas from "./components/FabricCanvas.vue";
 import ImageUploader from "./components/ImageUploader.vue";
@@ -144,7 +145,9 @@ const exportImage = () => {
   if (!store.canvas) return;
 
   // キャンバスをエクスポート
-  const dataUrl = exportCanvas(store.canvas, { format: "jpeg" });
+  const dataUrl = exportCanvas(store.canvas as unknown as Canvas, {
+    format: "jpeg",
+  });
   if (dataUrl) {
     // ファイル名の生成（現在日時を含む）
     const now = new Date();
@@ -165,7 +168,9 @@ const shareImage = async () => {
   if (!store.canvas) return;
 
   // キャンバスをエクスポート
-  const dataUrl = await exportCanvas(store.canvas, { format: "jpeg" });
+  const dataUrl = exportCanvas(store.canvas as unknown as Canvas, {
+    format: "jpeg",
+  });
   if (dataUrl) {
     // ファイル名の生成
     const filename = `画像テキストエディタ_${

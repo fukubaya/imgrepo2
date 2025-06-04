@@ -26,11 +26,11 @@ export function usePwa() {
     });
 
     // インストールプロンプトイベントの監視
-    window.addEventListener("beforeinstallprompt", (e: BeforeInstallPromptEvent) => {
+    window.addEventListener("beforeinstallprompt", (e: Event) => {
       // デフォルトの動作を防止
       e.preventDefault();
       // イベントを保存
-      deferredPrompt.value = e;
+      deferredPrompt.value = e as BeforeInstallPromptEvent;
       // インストール可能フラグを設定
       canInstall.value = true;
     });

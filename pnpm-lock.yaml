@@ -11,6 +11,9 @@ importers:
       '@types/fabric':
         specifier: ^5.3.10
         version: 5.3.10
+      '@types/node':
+        specifier: ^22.15.29
+        version: 22.15.29
       '@types/uuid':
         specifier: ^10.0.0
         version: 10.0.0
@@ -23,9 +26,6 @@ importers:
       uuid:
         specifier: ^11.1.0
         version: 11.1.0
-      vite-plugin-pwa:
-        specifier: ^0.21.2
-        version: 0.21.2(vite@6.2.3(terser@5.39.2))(workbox-build@7.3.0)(workbox-window@7.3.0)
       vue:
         specifier: ^3.5.13
         version: 3.5.13(typescript@5.7.3)
@@ -35,7 +35,7 @@ importers:
         version: 9.27.0
       '@vitejs/plugin-vue':
         specifier: ^5.2.1
-        version: 5.2.3(vite@6.2.3(terser@5.39.2))(vue@3.5.13(typescript@5.7.3))
+        version: 5.2.3(vite@6.2.3(@types/node@22.15.29)(terser@5.39.2))(vue@3.5.13(typescript@5.7.3))
       '@vue/tsconfig':
         specifier: ^0.7.0
         version: 0.7.0(typescript@5.7.3)(vue@3.5.13(typescript@5.7.3))
@@ -59,7 +59,10 @@ importers:
         version: 8.32.1(eslint@9.27.0)(typescript@5.7.3)
       vite:
         specifier: ^6.2.0
-        version: 6.2.3(terser@5.39.2)
+        version: 6.2.3(@types/node@22.15.29)(terser@5.39.2)
+      vite-plugin-pwa:
+        specifier: ^0.21.2
+        version: 0.21.2(vite@6.2.3(@types/node@22.15.29)(terser@5.39.2))(workbox-build@7.3.0)(workbox-window@7.3.0)
       vue-tsc:
         specifier: ^2.2.4
         version: 2.2.8(typescript@5.7.3)
@@ -1038,6 +1041,9 @@ packages:
 
   '@types/json-schema@7.0.15':
     resolution: {integrity: sha512-5+fP8P8MFNC+AyZCDxrB2pkZFPGzqQWUzpSeuuVLvm8VMcorNYavBqoFcxK8bQz4Qsbn4oUEEem4wDLfcysGHA==}
+
+  '@types/node@22.15.29':
+    resolution: {integrity: sha512-LNdjOkUDlU1RZb8e1kOIUpN1qQUlzGkEtbVNo53vbrwDg5om6oduhm4SiUaPW5ASTXhAiP0jInWG8Qx9fVlOeQ==}
 
   '@types/resolve@1.20.2':
     resolution: {integrity: sha512-60BCwRFOZCQhDncwQdxxeOEEkbc5dIMccYLwbxsS4TUNeVECQ/pBJ0j09mrHOl/JJvpRPGwO9SvE4nR2Nb/a4Q==}
@@ -2588,6 +2594,9 @@ packages:
     resolution: {integrity: sha512-nWJ91DjeOkej/TA8pXQ3myruKpKEYgqvpw9lz4OPHj/NWFNluYrjbz9j01CJ8yKQd2g4jFoOkINCTW2I5LEEyw==}
     engines: {node: '>= 0.4'}
 
+  undici-types@6.21.0:
+    resolution: {integrity: sha512-iwDZqg0QAGrg9Rav5H4n0M64c3mkR59cJ6wQp+7C4nI0gsmExaedaYLNO44eT4AtBBwjbTiGPMlt2Md0T9H9JQ==}
+
   unicode-canonical-property-names-ecmascript@2.0.1:
     resolution: {integrity: sha512-dA8WbNeb2a6oQzAQ55YlT5vQAWGV9WXOsi3SskE3bcCdM0P4SDd+24zS/OCacdRq5BkdsRj9q3Pg6YyQoxIGqg==}
     engines: {node: '>=4'}
@@ -3856,6 +3865,10 @@ snapshots:
 
   '@types/json-schema@7.0.15': {}
 
+  '@types/node@22.15.29':
+    dependencies:
+      undici-types: 6.21.0
+
   '@types/resolve@1.20.2': {}
 
   '@types/trusted-types@2.0.7': {}
@@ -3939,9 +3952,9 @@ snapshots:
       '@typescript-eslint/types': 8.32.1
       eslint-visitor-keys: 4.2.0
 
-  '@vitejs/plugin-vue@5.2.3(vite@6.2.3(terser@5.39.2))(vue@3.5.13(typescript@5.7.3))':
+  '@vitejs/plugin-vue@5.2.3(vite@6.2.3(@types/node@22.15.29)(terser@5.39.2))(vue@3.5.13(typescript@5.7.3))':
     dependencies:
-      vite: 6.2.3(terser@5.39.2)
+      vite: 6.2.3(@types/node@22.15.29)(terser@5.39.2)
       vue: 3.5.13(typescript@5.7.3)
 
   '@volar/language-core@2.4.12':
@@ -5717,6 +5730,8 @@ snapshots:
       has-symbols: 1.1.0
       which-boxed-primitive: 1.1.1
 
+  undici-types@6.21.0: {}
+
   unicode-canonical-property-names-ecmascript@2.0.1: {}
 
   unicode-match-property-ecmascript@2.0.0:
@@ -5759,23 +5774,24 @@ snapshots:
 
   uuid@11.1.0: {}
 
-  vite-plugin-pwa@0.21.2(vite@6.2.3(terser@5.39.2))(workbox-build@7.3.0)(workbox-window@7.3.0):
+  vite-plugin-pwa@0.21.2(vite@6.2.3(@types/node@22.15.29)(terser@5.39.2))(workbox-build@7.3.0)(workbox-window@7.3.0):
     dependencies:
       debug: 4.4.0
       pretty-bytes: 6.1.1
       tinyglobby: 0.2.12
-      vite: 6.2.3(terser@5.39.2)
+      vite: 6.2.3(@types/node@22.15.29)(terser@5.39.2)
       workbox-build: 7.3.0
       workbox-window: 7.3.0
     transitivePeerDependencies:
       - supports-color
 
-  vite@6.2.3(terser@5.39.2):
+  vite@6.2.3(@types/node@22.15.29)(terser@5.39.2):
     dependencies:
       esbuild: 0.25.1
       postcss: 8.5.3
       rollup: 4.37.0
     optionalDependencies:
+      '@types/node': 22.15.29
       fsevents: 2.3.3
       terser: 5.39.2
 
