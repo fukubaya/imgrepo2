@@ -639,10 +639,6 @@ const applyPreset = (presetName: string) => {
   margin: 0;
 }
 
-.effect-controls {
-  padding-left: 10px;
-}
-
 .control-row {
   margin-bottom: 10px;
 }
@@ -767,6 +763,25 @@ input:checked + .toggle-slider:before {
   .effect-section {
     margin-bottom: 15px;
     padding-bottom: 10px;
+  }
+
+  .text-panel {
+    display: flex;
+    gap: 10px;
+  }
+
+  .text-style-panel, .text-effects-panel {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .style-buttons-section {
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .effect-slider {
+    max-width: 33%;
   }
 }
 </style>
