@@ -97,6 +97,7 @@ import { Canvas } from "fabric";
 import { computed, onMounted, ref, watch } from "vue";
 import { useFabricCanvas } from "../composables/useFabricCanvas";
 import { useFabricText } from "../composables/useFabricText";
+import { roundToPointOne } from "../lib/common";
 import { useEditorStore } from "../stores/editorStore";
 
 // 状態
@@ -221,7 +222,7 @@ const addText = (t: string = "") => {
   if (!store.canvas) return;
 
   // キャンバスの中央に新しいテキストを作成
-  const scale = 1 / store.canvas.getZoom();
+  const scale = roundToPointOne(1 / store.canvas.getZoom());
   const text = createText(t || "テキストを入力", {
     left: 0,
     top: 0,
@@ -242,8 +243,9 @@ const addText = (t: string = "") => {
       store.canvas.width * upperRate / (text.width * scale),
       store.canvas.height * upperRate / (text.height * scale),
     );
-    text.scaleX = r * scale;
-    text.scaleY = r * scale;
+    const rScale = roundToPointOne(r * scale);
+    text.scaleX = rScale;
+    text.scaleY = rScale;
   }
 
   // テキストの位置を中央に設定

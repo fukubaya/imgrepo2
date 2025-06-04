@@ -29,6 +29,23 @@
           </select>
         </div>
 
+        <div class="style-section">
+          <label for="text-scale">サイズ:</label>
+          <div class="slider-with-value">
+            <input
+              type="range"
+              id="text-scale"
+              v-model.number="scale"
+              min="0.1"
+              max="50"
+              step="0.1"
+              @input="updateStyle"
+              class="style-slider"
+            />
+            <span class="value-display">{{ scale }}</span>
+          </div>
+        </div>
+
         <!-- テキスト色 -->
         <div class="style-section">
           <label for="text-color">色:</label>
@@ -262,6 +279,7 @@ import { computed, ref, watch } from "vue";
 import { useFabricText } from "../composables/useFabricText";
 import { AVAILABLE_FONTS } from "../constants/fonts";
 import { TEXT_EFFECT_PRESETS } from "../constants/textEffects";
+import { roundToPointOne } from "../lib/common";
 import { useEditorStore } from "../stores/editorStore";
 
 // ストア
@@ -294,6 +312,7 @@ const isBold = ref(false);
 const isItalic = ref(false);
 const isUnderline = ref(false);
 const textAlign = ref("left");
+const scale = ref(1);
 
 // 選択テキストが変わったらスタイル設定を更新
 watch(selectedText, (text) => {
@@ -305,6 +324,10 @@ watch(selectedText, (text) => {
     isItalic.value = text.fontStyle === "italic";
     isUnderline.value = text.underline || false;
     textAlign.value = text.textAlign || "left";
+    const rScale = roundToPointOne(text.scaleX || text.scaleY || 1);
+    text.scaleX = rScale;
+    text.scaleY = rScale;
+    scale.value = rScale;
   }
 }, { immediate: true });
 
@@ -320,6 +343,8 @@ const updateStyle = () => {
     fontStyle: isItalic.value ? "italic" : "normal",
     underline: isUnderline.value,
     textAlign: textAlign.value,
+    scaleX: scale.value,
+    scaleY: scale.value,
   });
 
   // 履歴に保存
@@ -381,6 +406,12 @@ watch(selectedText, (text) => {
       outlineColor.value = text.stroke as string;
       outlineWidth.value = text.strokeWidth || 1;
     }
+
+    // scale
+    const roundScale = roundToPointOne(text.scaleX || text.scaleY || 1);
+    text.scaleX = roundScale;
+    text.scaleY = roundScale;
+    scale.value = roundScale;
   }
 }, { immediate: true });
 
