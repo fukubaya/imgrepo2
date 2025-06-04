@@ -11,7 +11,6 @@
       <div class="panel-content" v-if="isTextSelected">
         <!-- フォント選択 -->
         <div class="style-section">
-          <label for="text-font">フォント:</label>
           <select
             id="text-font"
             v-model="fontFamily"
@@ -30,7 +29,6 @@
         </div>
 
         <div class="style-section">
-          <label for="text-scale">サイズ:</label>
           <div class="slider-with-value">
             <input
               type="range"
@@ -46,21 +44,19 @@
           </div>
         </div>
 
-        <!-- テキスト色 -->
-        <div class="style-section">
-          <label for="text-color">色:</label>
-          <input
-            type="color"
-            id="text-color"
-            v-model="textColor"
-            @input="updateStyle"
-            class="style-color-picker"
-          />
-        </div>
-
-        <!-- テキストスタイルボタン -->
-        <div class="style-section">
-          <div class="style-buttons">
+        <div class="style-buttons-section">
+          <!-- テキスト色 -->
+          <div class="buttons">
+            <input
+              type="color"
+              id="text-color"
+              v-model="textColor"
+              @input="updateStyle"
+              class="style-color-picker"
+            />
+          </div>
+          <!-- テキストスタイルボタン -->
+          <div class="buttons">
             <button
               :class="{ active: isBold }"
               @click="toggleBold"
@@ -86,12 +82,9 @@
               <span class="icon">U</span>
             </button>
           </div>
-        </div>
 
-        <!-- テキスト配置 -->
-        <div class="style-section">
-          <label>配置:</label>
-          <div class="align-buttons">
+          <!-- テキスト配置 -->
+          <div class="buttons">
             <button
               :class="{ active: textAlign === 'left' }"
               @click="setTextAlign('left')"
@@ -145,19 +138,18 @@
 
           <div class="effect-controls" v-if="hasShadow">
             <div class="control-row">
-              <label for="shadow-color">色:</label>
               <input
                 type="color"
                 id="shadow-color"
                 v-model="shadowColor"
                 @input="updateShadow"
                 class="effect-color-picker"
+                v-if="hasShadow"
               />
             </div>
-
             <div class="control-row">
-              <label for="shadow-blur">ぼかし:</label>
               <div class="slider-with-value">
+                <label for="shadow-blur">ぼかし</label>
                 <input
                   type="range"
                   id="shadow-blur"
@@ -172,8 +164,8 @@
             </div>
 
             <div class="control-row">
-              <label for="shadow-offset-x">X位置:</label>
               <div class="slider-with-value">
+                <label for="shadow-offset-x">X</label>
                 <input
                   type="range"
                   id="shadow-offset-x"
@@ -188,8 +180,8 @@
             </div>
 
             <div class="control-row">
-              <label for="shadow-offset-y">Y位置:</label>
               <div class="slider-with-value">
+                <label for="shadow-offset-y">Y</label>
                 <input
                   type="range"
                   id="shadow-offset-y"
@@ -221,19 +213,18 @@
 
           <div class="effect-controls" v-if="hasOutline">
             <div class="control-row">
-              <label for="outline-color">色:</label>
               <input
                 type="color"
                 id="outline-color"
                 v-model="outlineColor"
                 @input="updateOutline"
                 class="effect-color-picker"
+                v-if="hasOutline"
               />
             </div>
-
             <div class="control-row">
-              <label for="outline-width">太さ:</label>
               <div class="slider-with-value">
+                <label for="outline-width">太さ</label>
                 <input
                   type="range"
                   id="outline-width"
@@ -533,6 +524,13 @@ const applyPreset = (presetName: string) => {
   margin-bottom: 15px;
 }
 
+.style-buttons-section {
+  margin-bottom: 15px;
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+}
+
 .style-section label {
   display: block;
   margin-bottom: 5px;
@@ -570,15 +568,15 @@ const applyPreset = (presetName: string) => {
 }
 
 .style-color-picker {
-  width: 40px;
-  height: 40px;
+  width: 30px;
+  height: 30px;
   padding: 0;
   border: 1px solid #ddd;
   border-radius: 4px;
   cursor: pointer;
 }
 
-.style-buttons, .align-buttons {
+ .buttons {
   display: flex;
   gap: 5px;
 }
@@ -587,8 +585,8 @@ const applyPreset = (presetName: string) => {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 36px;
-  height: 36px;
+  width: 27px;
+  height: 27px;
   border: 1px solid #ddd;
   background-color: #fff;
   border-radius: 4px;
@@ -654,6 +652,8 @@ const applyPreset = (presetName: string) => {
   margin-bottom: 5px;
   font-size: 13px;
   color: #555;
+  min-width: 3em;
+  text-align: right;
 }
 
 .effect-slider {
@@ -672,31 +672,14 @@ const applyPreset = (presetName: string) => {
 }
 
 .effect-color-picker {
-  width: 36px;
-  height: 36px;
+  width: 30px;
+  height: 30px;
   padding: 0;
   border: 1px solid #ddd;
   border-radius: 4px;
   cursor: pointer;
 }
 
-.reset-btn {
-  width: 30px;
-  height: 30px;
-  border: 1px solid #ddd;
-  background-color: #fff;
-  border-radius: 4px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 14px;
-  transition: all 0.2s;
-}
-
-.reset-btn:hover {
-  background-color: #f5f5f5;
-}
 
 .toggle-switch {
   position: relative;
