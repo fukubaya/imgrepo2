@@ -16,7 +16,7 @@ export const TEXT_EFFECT_PRESETS: Record<string, TextEffectPreset> = {
   shadow: {
     name: "ドロップシャドウ",
     shadow: {
-      color: "rgba(0,0,0,0.6)",
+      color: "#000000",
       blur: 5,
       offsetX: 5,
       offsetY: 5,
@@ -38,20 +38,19 @@ export const TEXT_EFFECT_PRESETS: Record<string, TextEffectPreset> = {
     name: "ネオン",
     shadow: {
       color: "#00ffff",
-      blur: 15,
+      blur: 3,
       offsetX: 0,
       offsetY: 0,
     },
     stroke: "#ffffff",
-    strokeWidth: 1,
-    fill: "#00ffff",
+    fill: "#ffffff",
   },
 
   // レトロ
   retro: {
     name: "レトロ",
     shadow: {
-      color: "rgba(255,100,0,0.8)",
+      color: "#ff6400",
       blur: 3,
       offsetX: 3,
       offsetY: 3,
@@ -65,7 +64,7 @@ export const TEXT_EFFECT_PRESETS: Record<string, TextEffectPreset> = {
   "3d": {
     name: "3D",
     shadow: {
-      color: "rgba(0,0,0,0.5)",
+      color: "#000000",
       blur: 1,
       offsetX: 4,
       offsetY: 4,
@@ -78,7 +77,7 @@ export const TEXT_EFFECT_PRESETS: Record<string, TextEffectPreset> = {
   handwritten: {
     name: "手書き風",
     shadow: {
-      color: "rgba(0,0,0,0.2)",
+      color: "#000000",
       blur: 2,
       offsetX: 1,
       offsetY: 1,

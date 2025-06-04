@@ -250,6 +250,18 @@
               @click="applyPreset(key)"
               class="preset-btn"
               :title="preset.name"
+              :style="
+                {
+                  textShadow: preset.shadow
+                    ? `${preset.shadow.offsetX}px ${preset.shadow.offsetY}px ${preset.shadow.blur}px ${preset.shadow.color}`
+                    : 'none',
+                  '-webkit-text-stroke': preset.stroke
+                    ? `${
+                      preset.strokeWidth || 1
+                    }px ${preset.stroke}`
+                    : 'none',
+                }
+              "
             >
               {{ preset.name }}
             </button>
@@ -385,17 +397,19 @@ watch(selectedText, (text) => {
     const shadow = text.shadow;
     hasShadow.value = !!shadow;
     if (shadow) {
-      shadowColor.value = shadow.color || "rgba(0,0,0,0.6)";
-      shadowBlur.value = shadow.blur || 5;
-      shadowOffsetX.value = shadow.offsetX || 5;
-      shadowOffsetY.value = shadow.offsetY || 5;
+      shadowColor.value = shadow.color || "#000000";
+      shadowBlur.value = shadow.blur;
+      shadowOffsetX.value = shadow.offsetX;
+      shadowOffsetY.value = shadow.offsetY;
     }
 
     // アウトライン
     hasOutline.value = !!text.stroke && text.strokeWidth! > 0;
     if (text.stroke) {
       outlineColor.value = text.stroke as string;
-      outlineWidth.value = text.strokeWidth || 1;
+      outlineWidth.value = text.strokeWidth === undefined
+        ? 1
+        : text.strokeWidth;
     }
 
     // scale
@@ -462,16 +476,13 @@ const applyPreset = (presetName: string) => {
 
   const preset = TEXT_EFFECT_PRESETS[presetName];
   if (preset) {
-    // プリセット設定を反映
-    applyTextEffect(selectedText.value, preset);
-
     // UI状態も更新
     if (preset.shadow) {
       hasShadow.value = true;
-      shadowColor.value = preset.shadow.color || "rgba(0,0,0,0.6)";
-      shadowBlur.value = preset.shadow.blur || 5;
-      shadowOffsetX.value = preset.shadow.offsetX || 5;
-      shadowOffsetY.value = preset.shadow.offsetY || 5;
+      shadowColor.value = preset.shadow.color;
+      shadowBlur.value = preset.shadow.blur;
+      shadowOffsetX.value = preset.shadow.offsetX;
+      shadowOffsetY.value = preset.shadow.offsetY;
     } else {
       hasShadow.value = false;
     }
@@ -479,10 +490,15 @@ const applyPreset = (presetName: string) => {
     if (preset.stroke) {
       hasOutline.value = true;
       outlineColor.value = preset.stroke;
-      outlineWidth.value = preset.strokeWidth || 1;
+      outlineWidth.value = preset.strokeWidth === undefined
+        ? 1
+        : preset.strokeWidth;
     } else {
       hasOutline.value = false;
     }
+
+    // プリセット設定を反映
+    applyTextEffect(selectedText.value, preset);
 
     // 履歴に保存
     store.saveState();
