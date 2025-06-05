@@ -240,6 +240,53 @@
           </div>
         </div>
 
+        <!-- 背景色  -->
+        <div class="effect-section">
+          <div class="effect-header">
+            <h4>背景色</h4>
+            <label class="toggle-switch">
+              <input
+                type="checkbox"
+                v-model="hasBackgroundColor"
+                @change="updateBackgroundColor"
+              >
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+
+          <div class="effect-controls" v-if="hasBackgroundColor">
+            <div class="control-row">
+              <input
+                type="color"
+                id="background-color"
+                v-model="backgroundColor"
+                @input="updateBackgroundColor"
+                class="effect-color-picker"
+              />
+            </div>
+            <div class="control-row">
+              <div class="slider-with-value">
+                <label for="background-color-opacity">透明度</label>
+                <input
+                  type="range"
+                  id="background-color-opacity"
+                  v-model.number="backgroundColorOpacity"
+                  min="0"
+                  max="1"
+                  step="0.01"
+                  @input="updateBackgroundColor"
+                  class="effect-slider"
+                />
+                <span class="value-display">{{
+                    Math.round(
+                      backgroundColorOpacity * 100,
+                    )
+                  }}%</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <!-- エフェクトプリセット -->
         <div class="effect-section">
           <h4>エフェクトプリセット</h4>
@@ -260,6 +307,13 @@
                       preset.strokeWidth || 1
                     }px ${preset.stroke}`
                     : 'none',
+                  backgroundColor: preset.backgroundColor
+                    ? `${preset.backgroundColor}${
+                      Math.round(
+                        (preset.backgroundColorOpacity || 1) * 255,
+                      ).toString(16).padStart(2, '0')
+                    }`
+                    : 'transparent',
                 }
               "
             >
@@ -282,7 +336,7 @@ import { computed, ref, watch } from "vue";
 import { useFabricText } from "../composables/useFabricText";
 import { AVAILABLE_FONTS } from "../constants/fonts";
 import { TEXT_EFFECT_PRESETS } from "../constants/textEffects";
-import { roundToPointOne } from "../lib/common";
+import { hexToRgb, rgbToHex, roundToPointOne } from "../lib/common";
 import { useEditorStore } from "../stores/editorStore";
 
 // ストア
@@ -390,6 +444,11 @@ const hasOutline = ref(false);
 const outlineColor = ref("#ffffff");
 const outlineWidth = ref(1);
 
+// 背景色設定
+const hasBackgroundColor = ref(false);
+const backgroundColor = ref("#ffffff");
+const backgroundColorOpacity = ref(1);
+
 // 選択テキストが変わったら効果設定を更新
 watch(selectedText, (text) => {
   if (text) {
@@ -410,6 +469,27 @@ watch(selectedText, (text) => {
       outlineWidth.value = text.strokeWidth === undefined
         ? 1
         : text.strokeWidth;
+    }
+
+    // 背景色
+    hasBackgroundColor.value = !!text.textBackgroundColor;
+    if (text.textBackgroundColor) {
+      // RGBA形式から色と透明度を抽出
+      const color = text.textBackgroundColor as string;
+      const match = color.match(
+        /^rgba\((\d+),\s*(\d+),\s*(\d+),\s*([\d.]+)\)$/,
+      );
+      if (match) {
+        backgroundColor.value = rgbToHex(
+          parseInt(match[1]),
+          parseInt(match[2]),
+          parseInt(match[3]),
+        );
+        backgroundColorOpacity.value = parseFloat(match[4]);
+      } else {
+        backgroundColor.value = color;
+        backgroundColorOpacity.value = 1;
+      }
     }
 
     // scale
@@ -470,6 +550,29 @@ const updateOutline = () => {
   store.saveState();
 };
 
+// 背景色の更新
+const updateBackgroundColor = () => {
+  if (!selectedText.value) return;
+
+  if (hasBackgroundColor.value) {
+    // RGBカラーをRGBAに変換
+    const rgb = backgroundColor.value.startsWith("#")
+      ? hexToRgb(backgroundColor.value)
+      : backgroundColor.value.match(/\d+,\s*\d+,\s*\d+/)?.[0] || "0,0,0";
+
+    updateTextStyle(selectedText.value, {
+      textBackgroundColor: `rgba(${rgb}, ${backgroundColorOpacity.value})`,
+    });
+  } else {
+    updateTextStyle(selectedText.value, {
+      textBackgroundColor: null,
+    });
+  }
+
+  // 履歴に保存
+  store.saveState();
+};
+
 // エフェクトプリセットの適用
 const applyPreset = (presetName: string) => {
   if (!selectedText.value) return;
@@ -495,6 +598,16 @@ const applyPreset = (presetName: string) => {
         : preset.strokeWidth;
     } else {
       hasOutline.value = false;
+    }
+
+    if (preset.backgroundColor) {
+      hasBackgroundColor.value = true;
+      backgroundColor.value = preset.backgroundColor;
+      backgroundColorOpacity.value = preset.backgroundColorOpacity === undefined
+        ? 1
+        : preset.backgroundColorOpacity;
+    } else {
+      hasBackgroundColor.value = false;
     }
 
     // プリセット設定を反映

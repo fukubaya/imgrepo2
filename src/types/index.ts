@@ -30,6 +30,8 @@ export interface TextEffectPreset {
   fontWeight?: string | number;
   fontStyle?: string;
   fill?: string;
+  backgroundColor?: string | null;
+  backgroundColorOpacity?: number;
 }
 
 // 履歴管理

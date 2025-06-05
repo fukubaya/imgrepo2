@@ -2,6 +2,7 @@ import { markRaw } from "vue";
 import type { TextEffectPreset } from "../types";
 // Fabric.jsをインポート
 import { IText, type ITextProps, Shadow } from "fabric";
+import { hexToRgb } from "../lib/common";
 
 /**
  * Fabric.jsのテキスト操作のためのコンポーザブル
@@ -25,6 +26,7 @@ export function useFabricText() {
         textAlign: "left",
         editable: true,
         paintFirst: "stroke",
+        textBackgroundColor: null,
         ...options,
       }),
     );
@@ -35,7 +37,10 @@ export function useFabricText() {
    * @param textObject テキストオブジェクト
    * @param styleOptions スタイルオプション
    */
-  const updateTextStyle = (textObject: IText, styleOptions: Partial<ITextProps>) => {
+  const updateTextStyle = (
+    textObject: IText,
+    styleOptions: Partial<ITextProps & { textBackgroundColor?: string | null }>,
+  ) => {
     // スタイルを適用
     textObject.set(styleOptions);
 
@@ -52,7 +57,7 @@ export function useFabricText() {
    */
   const applyTextEffect = (textObject: IText, effect: TextEffectPreset) => {
     // 効果のオプションを作成
-    const effectOptions: Partial<ITextProps> = {};
+    const effectOptions: Partial<ITextProps & { textBackgroundColor?: string | null }> = {};
 
     // 影の設定
     if (effect.shadow) {
@@ -73,6 +78,17 @@ export function useFabricText() {
     } else {
       effectOptions.stroke = null;
       effectOptions.strokeWidth = 0;
+    }
+
+    // 背景色の設定
+    if (effect.backgroundColor) {
+      const rgb = effect.backgroundColor.startsWith("#")
+        ? hexToRgb(effect.backgroundColor)
+        : effect.backgroundColor.match(/\d+,\s*\d+,\s*\d+/)?.[0] || "0,0,0";
+
+      effectOptions.textBackgroundColor = `rgba(${rgb}, ${effect.backgroundColorOpacity || 1})`;
+    } else {
+      effectOptions.textBackgroundColor = null;
     }
 
     // フォントスタイルの設定
