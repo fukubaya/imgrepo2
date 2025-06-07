@@ -36,6 +36,8 @@ export const AVAILABLE_FONTS: FontOption[] = [
   { value: "Hiragino Mincho ProN W6", label: "ヒラギノ明朝 ProN W6", category: "japanese" },
   { value: "fot-tsukuardgothic-std", label: "FOT-筑紫A丸ゴシック Std", category: "japanese" },
   { value: "fot-tsukubrdgothic-std", label: "FOT-筑紫B丸ゴシック Std", category: "japanese" },
+  { value: "fot-klee-pro", label: "FOT-クレー Pro", category: "japanese" },
+  { value: "fot-chiaro-std", label: "FOT-キアロ Std", category: "japanese" },
   { value: "Tsukushi A Round Gothic Bold", label: "筑紫A丸ゴシック ボールド", category: "japanese" },
   { value: "Tsukushi A Round Gothic Regular", label: "筑紫A丸ゴシック レギュラー", category: "japanese" },
   { value: "Tsukushi B Round Gothic Bold", label: "筑紫B丸ゴシック ボールド", category: "japanese" },
@@ -63,6 +65,13 @@ export const AVAILABLE_FONTS: FontOption[] = [
   { value: "zen-maru-gothic", label: "Zen Maru Gothic", category: "japanese" },
   { value: "dela-gothic-one", label: "Dela Gothic One", category: "japanese" },
   { value: "Osaka", label: "Osaka", category: "japanese" },
+  { value: "ah-hakushu-school-prs", label: "AH白洲学校ペン楷書体", category: "japanese" },
+  { value: "kinuta-shin-enpitsu-stdn", label: "砧 芯・鉛筆 StdN", category: "japanese" },
+  { value: "ab-togetsukanteiryu", label: "AB-渡月勘亭流", category: "japanese" },
+  { value: "ab-hiro", label: "AB-ひろ", category: "japanese" },
+  { value: "vdl-megag-pop-futoline", label: "VDL メガG-pop", category: "japanese" },
+  { value: "dotgothic16", label: "DotGothic16", category: "japanese" },
+  { value: "ten-mincho-antique", label: "貂明朝アンチック", category: "japanese" },
 
   // 装飾フォント
   { value: "Comic Sans MS", label: "Comic Sans MS", category: "decorative" },
