@@ -2,6 +2,9 @@ interface Config {
   kitId: string;
   scriptTimeout?: number;
   async: boolean;
+  loading?: () => void;
+  active?: () => void;
+  inactive?: () => void;
 }
 declare global {
   interface Window {

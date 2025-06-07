@@ -97,6 +97,7 @@ import { Canvas } from "fabric";
 import { computed, onMounted, ref, watch } from "vue";
 import { useFabricCanvas } from "../composables/useFabricCanvas";
 import { useFabricText } from "../composables/useFabricText";
+import { DEFAULT_FONT } from "../constants/fonts";
 import { roundToPointOne } from "../lib/common";
 import { useEditorStore } from "../stores/editorStore";
 
@@ -226,7 +227,7 @@ const addText = (t: string = "") => {
   const text = createText(t || "テキストを入力", {
     left: 0,
     top: 0,
-    fontFamily: "Arial",
+    fontFamily: DEFAULT_FONT,
     fontSize: 30,
     fill: "#000000",
     scaleX: scale,

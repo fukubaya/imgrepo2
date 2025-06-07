@@ -2,6 +2,7 @@ import { markRaw } from "vue";
 import type { TextEffectPreset } from "../types";
 // Fabric.jsをインポート
 import { IText, type ITextProps, Shadow } from "fabric";
+import { DEFAULT_FONT } from "../constants/fonts";
 import { hexToRgb } from "../lib/common";
 
 /**
@@ -18,7 +19,7 @@ export function useFabricText() {
     // テキストオブジェクトの作成
     return markRaw(
       new IText(text, {
-        fontFamily: "Arial",
+        fontFamily: DEFAULT_FONT,
         fontSize: 30,
         fill: "#000000",
         fontWeight: "normal",

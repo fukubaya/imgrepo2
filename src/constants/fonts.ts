@@ -3,6 +3,9 @@ import type { FontOption } from "../types";
 // 利用可能なフォントのリスト
 export const AVAILABLE_FONTS: FontOption[] = [
   // 基本フォント
+  { value: "sans-serif", label: "Sans-serif", category: "sans-serif" },
+  { value: "serif", label: "Serif", category: "serif" },
+  { value: "monospace", label: "Monospace", category: "monospace" },
   { value: "Arial", label: "Arial", category: "sans-serif" },
   { value: "Courier New", label: "Courier New", category: "monospace" },
 
@@ -78,4 +81,4 @@ export const FONT_CATEGORIES = [
 ];
 
 // デフォルトフォント
-export const DEFAULT_FONT = "Arial";
+export const DEFAULT_FONT = "sans-serif";

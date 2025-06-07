@@ -332,11 +332,17 @@
 
 <script setup lang="ts">
 import { IText, Shadow } from "fabric";
-import { computed, ref, watch } from "vue";
+import { computed, onMounted, ref, watch } from "vue";
 import { useFabricText } from "../composables/useFabricText";
-import { AVAILABLE_FONTS } from "../constants/fonts";
+import { useFont } from "../composables/useFont";
+import { AVAILABLE_FONTS, DEFAULT_FONT } from "../constants/fonts";
 import { TEXT_EFFECT_PRESETS } from "../constants/textEffects";
-import { hexToRgb, rgbToHex, roundToPointOne } from "../lib/common";
+import {
+  hexToRgb,
+  isAvailableFont,
+  rgbToHex,
+  roundToPointOne,
+} from "../lib/common";
 import { useEditorStore } from "../stores/editorStore";
 
 // ストア
@@ -352,6 +358,9 @@ const availableFonts = ref(AVAILABLE_FONTS);
 const isTextSelected = computed(() => {
   return store.isTextSelected;
 });
+
+// フォント読み込み
+const { loadFont } = useFont();
 
 // 選択中のテキストオブジェクト
 const selectedText = computed<IText | null>(() => {
@@ -371,10 +380,26 @@ const isUnderline = ref(false);
 const textAlign = ref("left");
 const scale = ref(1);
 
+//
+onMounted(() => {
+  // fontの読み込み
+  loadFont(document, {
+    kitId: import.meta.env.VITE_ADOBE_KITID,
+    scriptTimeout: 3000,
+    async: true,
+    active: () => {
+      // フォント読み込み完了後に利用可能なフォントを更新
+      availableFonts.value = AVAILABLE_FONTS.filter((font) => {
+        return isAvailableFont(document, font);
+      });
+    },
+  });
+});
+
 // 選択テキストが変わったらスタイル設定を更新
 watch(selectedText, (text) => {
   if (text) {
-    fontFamily.value = text.fontFamily || "Arial";
+    fontFamily.value = text.fontFamily || DEFAULT_FONT;
     fontSize.value = text.fontSize || 30;
     textColor.value = text.fill as string || "#000000";
     isBold.value = text.fontWeight === "bold";
