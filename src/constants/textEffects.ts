@@ -95,6 +95,22 @@ export const TEXT_EFFECT_PRESETS: Record<string, TextEffectPreset> = {
     strokeWidth: 3,
     fontWeight: "bold",
   },
+
+  // カラブルシャドウ
+  colorfulShadow: {
+    name: "カラブルシャドウ",
+    shadow: {
+      color: "#ff0000",
+      blur: 0,
+      offsetX: 7,
+      offsetY: 7,
+    },
+    stroke: null,
+    strokeWidth: 0,
+    backgroundColor: "#0000ff",
+    backgroundColorOpacity: 1.0,
+    fill: "#ffffff",
+  },
 };
 
 // デフォルトのテキスト効果
