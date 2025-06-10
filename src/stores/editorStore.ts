@@ -3,7 +3,7 @@ import { markRaw } from "vue";
 import type { EditorState, HistoryState } from "../types";
 
 // Fabric.jsをインポート
-import { Canvas, IText } from "fabric";
+import { Canvas, Textbox } from "fabric";
 
 // エディタストア
 export const useEditorStore = defineStore("editor", {
@@ -33,7 +33,7 @@ export const useEditorStore = defineStore("editor", {
 
     // 選択中のオブジェクトがテキストか
     isTextSelected: (state) => {
-      return state.selectedObject && state.selectedObject.type === "i-text";
+      return state.selectedObject && state.selectedObject.type === "textbox";
     },
 
     // 元に戻せるか
@@ -56,7 +56,7 @@ export const useEditorStore = defineStore("editor", {
     },
 
     // 選択オブジェクトの設定
-    setSelectedObject(object: IText | null) {
+    setSelectedObject(object: Textbox | null) {
       this.selectedObject = object;
     },
 
@@ -69,7 +69,7 @@ export const useEditorStore = defineStore("editor", {
     deleteSelectedObject() {
       if (!this.canvas || !this.selectedObject) return;
 
-      this.canvas.remove(this.selectedObject as IText);
+      this.canvas.remove(this.selectedObject as Textbox);
       this.setSelectedObject(null);
       this.canvas.requestRenderAll();
 
@@ -81,7 +81,7 @@ export const useEditorStore = defineStore("editor", {
     duplicateSelectedObject() {
       if (!this.canvas || !this.selectedObject) return;
 
-      this.selectedObject.clone().then((cloned: IText) => {
+      this.selectedObject.clone().then((cloned: Textbox) => {
         // 少しオフセットして配置
         cloned.set({
           left: (this.selectedObject?.left || 0) + 20,
@@ -106,7 +106,7 @@ export const useEditorStore = defineStore("editor", {
     bringForward() {
       if (!this.canvas || !this.selectedObject) return;
 
-      this.canvas.bringObjectForward(this.selectedObject as IText);
+      this.canvas.bringObjectForward(this.selectedObject as Textbox);
       this.canvas.requestRenderAll();
 
       // 履歴に保存
@@ -117,7 +117,7 @@ export const useEditorStore = defineStore("editor", {
     sendBackward() {
       if (!this.canvas || !this.selectedObject) return;
 
-      this.canvas.sendObjectBackwards(this.selectedObject as IText);
+      this.canvas.sendObjectBackwards(this.selectedObject as Textbox);
       this.canvas.requestRenderAll();
 
       // 履歴に保存
@@ -128,7 +128,7 @@ export const useEditorStore = defineStore("editor", {
     bringToFront() {
       if (!this.canvas || !this.selectedObject) return;
 
-      this.canvas.bringObjectToFront(this.selectedObject as IText);
+      this.canvas.bringObjectToFront(this.selectedObject as Textbox);
       this.canvas.requestRenderAll();
 
       // 履歴に保存
@@ -139,7 +139,7 @@ export const useEditorStore = defineStore("editor", {
     sendToBack() {
       if (!this.canvas || !this.selectedObject) return;
 
-      this.canvas.sendObjectToBack(this.selectedObject as IText);
+      this.canvas.sendObjectToBack(this.selectedObject as Textbox);
       this.canvas.requestRenderAll();
 
       // 履歴に保存

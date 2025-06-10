@@ -331,7 +331,7 @@
 </template>
 
 <script setup lang="ts">
-import { IText, Shadow } from "fabric";
+import { Shadow, Textbox } from "fabric";
 import { computed, onMounted, ref, watch } from "vue";
 import { useFabricText } from "../composables/useFabricText";
 import { useFont } from "../composables/useFont";
@@ -363,9 +363,9 @@ const isTextSelected = computed(() => {
 const { loadFont } = useFont();
 
 // 選択中のテキストオブジェクト
-const selectedText = computed<IText | null>(() => {
+const selectedText = computed<Textbox | null>(() => {
   if (isTextSelected.value && store.selectedObject) {
-    return store.selectedObject as IText;
+    return store.selectedObject as Textbox;
   }
   return null;
 });

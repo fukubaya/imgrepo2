@@ -1,11 +1,11 @@
 // Fabric.jsの型定義を簡略化
-import { Canvas, IText } from "fabric";
+import { Canvas, Textbox } from "fabric";
 
 // エディタの状態
 export interface EditorState {
   canvas: Canvas | null;
   backgroundImage: string | null;
-  selectedObject: IText | null;
+  selectedObject: Textbox | null;
   isEditing: boolean;
 }
 
