@@ -111,6 +111,29 @@
             </button>
           </div>
         </div>
+
+        <div class="style-section">
+          <div class="control-row">
+            <div class="slider-with-value">
+              <label for="background-color-opacity">透明度</label>
+              <input
+                type="range"
+                id="background-color-opacity"
+                v-model.number="textColorOpacity"
+                min="0"
+                max="1"
+                step="0.01"
+                @input="updateStyle"
+                class="effect-slider"
+              />
+              <span class="value-display">{{
+                  Math.round(
+                    textColorOpacity * 100,
+                  )
+                }}%</span>
+            </div>
+          </div>
+        </div>
       </div>
 
       <div class="panel-content empty-state" v-else>
@@ -338,6 +361,7 @@ import { useFont } from "../composables/useFont";
 import { AVAILABLE_FONTS, DEFAULT_FONT } from "../constants/fonts";
 import { TEXT_EFFECT_PRESETS } from "../constants/textEffects";
 import {
+  extractRGBA,
   hexToRgb,
   isAvailableFont,
   rgbToHex,
@@ -374,6 +398,7 @@ const selectedText = computed<Textbox | null>(() => {
 const fontFamily = ref("Arial");
 const fontSize = ref(30);
 const textColor = ref("#000000");
+const textColorOpacity = ref(1);
 const isBold = ref(false);
 const isItalic = ref(false);
 const isUnderline = ref(false);
@@ -401,7 +426,7 @@ watch(selectedText, (text) => {
   if (text) {
     fontFamily.value = text.fontFamily || DEFAULT_FONT;
     fontSize.value = text.fontSize || 30;
-    textColor.value = text.fill as string || "#000000";
+    textColor.value = text.fill as string || "rgb(0 0 0 / 100%)";
     isBold.value = text.fontWeight === "bold";
     isItalic.value = text.fontStyle === "italic";
     isUnderline.value = text.underline || false;
@@ -417,10 +442,19 @@ watch(selectedText, (text) => {
 const updateStyle = () => {
   if (!selectedText.value) return;
 
+  const rgb = (textColor.value.startsWith("#")
+    ? hexToRgb(textColor.value)
+    : textColor.value.match(/\d+,\s*\d+,\s*\d+/)?.[0] || "0,0,0").split(",");
+  const rScale = roundToPointOne(
+    selectedText.value.scaleX || selectedText.value.scaleY || 1,
+  );
+  scale.value = rScale;
   updateTextStyle(selectedText.value, {
     fontFamily: fontFamily.value,
     fontSize: fontSize.value,
-    fill: textColor.value,
+    fill: `rgb(${rgb[0]} ${rgb[1]} ${rgb[2]} / ${
+      textColorOpacity.value * 100
+    }%)`,
     fontWeight: isBold.value ? "bold" : "normal",
     fontStyle: isItalic.value ? "italic" : "normal",
     underline: isUnderline.value,
@@ -634,6 +668,15 @@ const applyPreset = (presetName: string) => {
     } else {
       hasBackgroundColor.value = false;
     }
+
+    // fillの色と透明度を設定
+    const rgba = extractRGBA(preset.fill || "0,0,0,100").split(",");
+    textColor.value = rgbToHex(
+      parseInt(rgba[0]),
+      parseInt(rgba[1]),
+      parseInt(rgba[2]),
+    );
+    textColorOpacity.value = parseFloat(rgba[3]) / 100 || 1;
 
     // プリセット設定を反映
     applyTextEffect(selectedText.value, preset);

@@ -13,6 +13,18 @@ export const hexToRgb: (hex: string) => string = (hex: string) => {
   return `${r},${g},${b}`;
 };
 
+export const extractRGBA: (rgbop: string) => string = (rgbop: string) => {
+  const match = rgbop.match(/rgb?\((\d+)\s*(\d+)\s*(\d+)\s*\/\s*(\d*\.?\d+)%\s*\)/);
+  if (!match) return "0,0,0,0";
+
+  const r = match[1];
+  const g = match[2];
+  const b = match[3];
+  const a = match[4];
+
+  return `${r},${g},${b},${a}`;
+};
+
 export const rgbToHex: (r: number, g: number, b: number) => string = (r, g, b) => {
   return `#${((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1)}`;
 };

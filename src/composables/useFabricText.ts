@@ -21,7 +21,7 @@ export function useFabricText() {
       new Textbox(text, {
         fontFamily: DEFAULT_FONT,
         fontSize: 30,
-        fill: "#000000",
+        fill: "rgb(0 0 0 / 100%)",
         fontWeight: "normal",
         fontStyle: "normal",
         textAlign: "left",

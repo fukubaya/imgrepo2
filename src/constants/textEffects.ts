@@ -111,6 +111,15 @@ export const TEXT_EFFECT_PRESETS: Record<string, TextEffectPreset> = {
     backgroundColorOpacity: 1.0,
     fill: "#ffffff",
   },
+
+  // 白抜き
+  whiteOutline: {
+    name: "白抜き",
+    shadow: null,
+    stroke: "#ffffff",
+    strokeWidth: 1,
+    fill: "rgb(0 0 0 / 50%)",
+  },
 };
 
 // デフォルトのテキスト効果
