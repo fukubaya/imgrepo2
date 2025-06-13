@@ -623,7 +623,6 @@ const applyPreset = (presetName: string) => {
   if (!selectedText.value) return;
 
   const preset = TEXT_EFFECT_PRESETS[presetName];
-  console.log("Applying preset:", presetName, preset);
   if (preset) {
     // UI状態も更新
     if (preset.shadow) {
