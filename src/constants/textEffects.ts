@@ -38,11 +38,12 @@ export const TEXT_EFFECT_PRESETS: Record<string, TextEffectPreset> = {
     name: "ネオン",
     shadow: {
       color: "#00ffff",
-      blur: 3,
+      blur: 10,
       offsetX: 0,
       offsetY: 0,
     },
-    stroke: "#ffffff",
+    stroke: "#00ffff",
+    strokeWidth: 1,
     fill: "rgb(255 255 255 / 100%)",
   },
 
