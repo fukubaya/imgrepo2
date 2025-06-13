@@ -556,7 +556,6 @@ const updateShadow = () => {
       affectStroke: false,
       blur: shadowBlur.value,
       color: shadowColor.value,
-      id: 0,
       includeDefaultValues: true,
       nonScaling: false,
       offsetX: shadowOffsetX.value,
