@@ -3,7 +3,6 @@ import type { TextEffectPreset } from "../types";
 // Fabric.jsをインポート
 import { Shadow, Textbox, type TextboxProps } from "fabric";
 import { DEFAULT_FONT } from "../constants/fonts";
-import { hexToRgb } from "../lib/common";
 
 /**
  * Fabric.jsのテキスト操作のためのコンポーザブル
@@ -82,12 +81,8 @@ export function useFabricText() {
     }
 
     // 背景色の設定
-    if (effect.backgroundColor) {
-      const rgb = effect.backgroundColor.startsWith("#")
-        ? hexToRgb(effect.backgroundColor)
-        : effect.backgroundColor.match(/\d+,\s*\d+,\s*\d+/)?.[0] || "0,0,0";
-
-      effectOptions.textBackgroundColor = `rgba(${rgb}, ${effect.backgroundColorOpacity || 1})`;
+    if (effect.textBackgroundColor) {
+      effectOptions.textBackgroundColor = effect.textBackgroundColor; // 直接文字色を設定
     } else {
       effectOptions.textBackgroundColor = null;
     }

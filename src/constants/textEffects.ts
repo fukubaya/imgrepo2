@@ -43,7 +43,7 @@ export const TEXT_EFFECT_PRESETS: Record<string, TextEffectPreset> = {
       offsetY: 0,
     },
     stroke: "#ffffff",
-    fill: "#ffffff",
+    fill: "rgb(255 255 255 / 100%)",
   },
 
   // レトロ
@@ -107,9 +107,7 @@ export const TEXT_EFFECT_PRESETS: Record<string, TextEffectPreset> = {
     },
     stroke: null,
     strokeWidth: 0,
-    backgroundColor: "#0000ff",
-    backgroundColorOpacity: 1.0,
-    fill: "#ffffff",
+    textBackgroundColor: "rgb(0 0 255 / 100%)",
   },
 
   // 白抜き

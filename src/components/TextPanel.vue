@@ -330,12 +330,8 @@
                       preset.strokeWidth || 1
                     }px ${preset.stroke}`
                     : 'none',
-                  backgroundColor: preset.backgroundColor
-                    ? `${preset.backgroundColor}${
-                      Math.round(
-                        (preset.backgroundColorOpacity || 1) * 255,
-                      ).toString(16).padStart(2, '0')
-                    }`
+                  backgroundColor: preset.textBackgroundColor
+                    ? preset.textBackgroundColor
                     : 'transparent',
                 }
               "
@@ -424,9 +420,11 @@ onMounted(() => {
 // 選択テキストが変わったらスタイル設定を更新
 watch(selectedText, (text) => {
   if (text) {
+    const rgba = extractRGBA(text.fill as string || "rgb(0 0 0 / 100%)");
     fontFamily.value = text.fontFamily || DEFAULT_FONT;
     fontSize.value = text.fontSize || 30;
-    textColor.value = text.fill as string || "rgb(0 0 0 / 100%)";
+    textColor.value = rgbToHex(rgba);
+    textColorOpacity.value = rgba.a ? rgba.a / 100.0 : 1;
     isBold.value = text.fontWeight === "bold";
     isItalic.value = text.fontStyle === "italic";
     isUnderline.value = text.underline || false;
@@ -442,9 +440,7 @@ watch(selectedText, (text) => {
 const updateStyle = () => {
   if (!selectedText.value) return;
 
-  const rgb = (textColor.value.startsWith("#")
-    ? hexToRgb(textColor.value)
-    : textColor.value.match(/\d+,\s*\d+,\s*\d+/)?.[0] || "0,0,0").split(",");
+  const rgba = hexToRgb(textColor.value);
   const rScale = roundToPointOne(
     selectedText.value.scaleX || selectedText.value.scaleY || 1,
   );
@@ -452,7 +448,7 @@ const updateStyle = () => {
   updateTextStyle(selectedText.value, {
     fontFamily: fontFamily.value,
     fontSize: fontSize.value,
-    fill: `rgb(${rgb[0]} ${rgb[1]} ${rgb[2]} / ${
+    fill: `rgb(${rgba.r} ${rgba.g} ${rgba.b} / ${
       textColorOpacity.value * 100
     }%)`,
     fontWeight: isBold.value ? "bold" : "normal",
@@ -533,22 +529,13 @@ watch(selectedText, (text) => {
     // 背景色
     hasBackgroundColor.value = !!text.textBackgroundColor;
     if (text.textBackgroundColor) {
+      hasBackgroundColor.value = true;
       // RGBA形式から色と透明度を抽出
-      const color = text.textBackgroundColor as string;
-      const match = color.match(
-        /^rgba\((\d+),\s*(\d+),\s*(\d+),\s*([\d.]+)\)$/,
+      const rgba = extractRGBA(
+        text.textBackgroundColor as string || "rgb(0 0 0 / 100%)",
       );
-      if (match) {
-        backgroundColor.value = rgbToHex(
-          parseInt(match[1]),
-          parseInt(match[2]),
-          parseInt(match[3]),
-        );
-        backgroundColorOpacity.value = parseFloat(match[4]);
-      } else {
-        backgroundColor.value = color;
-        backgroundColorOpacity.value = 1;
-      }
+      backgroundColor.value = rgbToHex(rgba);
+      backgroundColorOpacity.value = rgba.a ? rgba.a / 100 : 1;
     }
 
     // scale
@@ -615,12 +602,11 @@ const updateBackgroundColor = () => {
 
   if (hasBackgroundColor.value) {
     // RGBカラーをRGBAに変換
-    const rgb = backgroundColor.value.startsWith("#")
-      ? hexToRgb(backgroundColor.value)
-      : backgroundColor.value.match(/\d+,\s*\d+,\s*\d+/)?.[0] || "0,0,0";
-
+    const rgba = hexToRgb(backgroundColor.value as string);
     updateTextStyle(selectedText.value, {
-      textBackgroundColor: `rgba(${rgb}, ${backgroundColorOpacity.value})`,
+      textBackgroundColor: `rgb(${rgba.r} ${rgba.g} ${rgba.b} / ${
+        backgroundColorOpacity.value * 100
+      }%)`,
     });
   } else {
     updateTextStyle(selectedText.value, {
@@ -637,6 +623,7 @@ const applyPreset = (presetName: string) => {
   if (!selectedText.value) return;
 
   const preset = TEXT_EFFECT_PRESETS[presetName];
+  console.log("Applying preset:", presetName, preset);
   if (preset) {
     // UI状態も更新
     if (preset.shadow) {
@@ -659,24 +646,21 @@ const applyPreset = (presetName: string) => {
       hasOutline.value = false;
     }
 
-    if (preset.backgroundColor) {
+    if (preset.textBackgroundColor) {
       hasBackgroundColor.value = true;
-      backgroundColor.value = preset.backgroundColor;
-      backgroundColorOpacity.value = preset.backgroundColorOpacity === undefined
-        ? 1
-        : preset.backgroundColorOpacity;
+      const rgba = extractRGBA(preset.textBackgroundColor);
+      backgroundColor.value = rgbToHex(rgba);
+      backgroundColorOpacity.value = rgba.a ? rgba.a / 100 : 1;
     } else {
       hasBackgroundColor.value = false;
     }
 
     // fillの色と透明度を設定
-    const rgba = extractRGBA(preset.fill || "0,0,0,100").split(",");
-    textColor.value = rgbToHex(
-      parseInt(rgba[0]),
-      parseInt(rgba[1]),
-      parseInt(rgba[2]),
-    );
-    textColorOpacity.value = parseFloat(rgba[3]) / 100 || 1;
+    if (preset.fill) {
+      const rgba = extractRGBA(preset.fill);
+      textColor.value = rgbToHex(rgba);
+      textColorOpacity.value = rgba.a ? rgba.a / 100 : 1;
+    }
 
     // プリセット設定を反映
     applyTextEffect(selectedText.value, preset);

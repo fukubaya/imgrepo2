@@ -30,14 +30,21 @@ export interface TextEffectPreset {
   fontWeight?: string | number;
   fontStyle?: string;
   fill?: string;
-  backgroundColor?: string | null;
-  backgroundColorOpacity?: number;
+  textBackgroundColor?: string | null;
 }
 
 // 履歴管理
 export interface HistoryState {
   undoStack: string[];
   redoStack: string[];
+}
+
+// 色
+export interface Color {
+  r: number;
+  g: number;
+  b: number;
+  a?: number; // オプションでアルファ値
 }
 
 /**
