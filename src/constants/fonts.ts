@@ -69,9 +69,15 @@ export const AVAILABLE_FONTS: FontOption[] = [
   { value: "kinuta-shin-enpitsu-stdn", label: "砧 芯・鉛筆 StdN", category: "japanese" },
   { value: "ab-togetsukanteiryu", label: "AB-渡月勘亭流", category: "japanese" },
   { value: "ab-hiro", label: "AB-ひろ", category: "japanese" },
-  { value: "vdl-megag-pop-futoline", label: "VDL メガG-pop", category: "japanese" },
+  { value: "vdl-megag-pop-futoline", label: "VDL メガG-pop FutoLine", category: "japanese" },
+  { value: "vdl-megag-pop-shadow", label: "VDL メガG-pop Shadow", category: "japanese" },
   { value: "dotgothic16", label: "DotGothic16", category: "japanese" },
   { value: "ten-mincho-antique", label: "貂明朝アンチック", category: "japanese" },
+  { value: "ab-kirigirisu", label: "ABキリギリス", category: "japanese" },
+  { value: "ab-tombo-bold", label: "AB Tombo Bold", category: "japanese" },
+  { value: "ab-tsubaki", label: "AB-椿", category: "japanese" },
+  { value: "vdl-linegrpop-futoline", label: "VDL ラインGアール-pop FutoLine", category: "japanese" },
+  { value: "vdl-linegrpop-shadow", label: "VDL ラインGアール-pop Shadow", category: "japanese" },
 
   // 装飾フォント
   { value: "Comic Sans MS", label: "Comic Sans MS", category: "decorative" },
