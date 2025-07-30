@@ -36,6 +36,7 @@ export const AVAILABLE_FONTS: FontOption[] = [
   { value: "Hiragino Mincho ProN W6", label: "ヒラギノ明朝 ProN W6", category: "japanese" },
   { value: "fot-tsukuardgothic-std", label: "FOT-筑紫A丸ゴシック Std", category: "japanese" },
   { value: "fot-tsukubrdgothic-std", label: "FOT-筑紫B丸ゴシック Std", category: "japanese" },
+  { value: "fot-seurat-pron", label: "FOT-スーラ ProN", category: "japanese" },
   { value: "fot-klee-pro", label: "FOT-クレー Pro", category: "japanese" },
   { value: "fot-chiaro-std", label: "FOT-キアロ Std", category: "japanese" },
   { value: "Tsukushi A Round Gothic Bold", label: "筑紫A丸ゴシック ボールド", category: "japanese" },
