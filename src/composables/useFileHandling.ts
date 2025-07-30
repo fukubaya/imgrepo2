@@ -33,10 +33,32 @@ export function useFileHandling() {
 
       // 読み込み完了時の処理
       reader.onload = (e) => {
-        isLoading.value = false;
         if (e.target?.result) {
-          resolve(e.target.result as string);
+          const dataUrl = e.target.result as string;
+          const orgimg = new Image();
+          orgimg.onload = () => {
+            // mobile safari の制限のため 4096 * 4096 を超える画像は縮小する
+            if (orgimg.width * orgimg.height > 4096 * 4096) {
+              const r = Math.sqrt((4096 * 4096) / (orgimg.width * orgimg.height));
+              const newimg = document.createElement("canvas");
+              newimg.width = orgimg.width * r;
+              newimg.height = orgimg.height * r;
+              const ctx = newimg.getContext("2d");
+              ctx?.drawImage(orgimg, 0, 0, newimg.width, newimg.height);
+              resolve(newimg.toDataURL(file.type));
+            } else {
+              resolve(dataUrl);
+            }
+            isLoading.value = false;
+          };
+          orgimg.onerror = () => {
+            isLoading.value = false;
+            errorMessage.value = "画像データの解析に失敗しました";
+            reject(new Error("画像データの解析に失敗しました"));
+          };
+          orgimg.src = dataUrl;
         } else {
+          isLoading.value = false;
           errorMessage.value = "ファイルの読み込みに失敗しました";
           reject(new Error("ファイルの読み込みに失敗しました"));
         }
