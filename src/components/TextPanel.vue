@@ -30,6 +30,7 @@
 
         <div class="style-section">
           <div class="slider-with-value">
+            <label for="text-scale">スケール</label>
             <input
               type="range"
               id="text-scale"
@@ -41,6 +42,23 @@
               class="style-slider"
             />
             <span class="value-display">{{ scale }}</span>
+          </div>
+        </div>
+
+        <div class="style-section">
+          <div class="slider-with-value">
+            <label for="line-height">行の高さ</label>
+            <input
+              type="range"
+              id="line-height"
+              v-model.number="lineHeight"
+              min="0.5"
+              max="3"
+              step="0.1"
+              @input="updateStyle"
+              class="style-slider"
+            />
+            <span class="value-display">{{ lineHeight }}</span>
           </div>
         </div>
 
@@ -400,6 +418,7 @@ const isItalic = ref(false);
 const isUnderline = ref(false);
 const textAlign = ref("left");
 const scale = ref(1);
+const lineHeight = ref(1.2);
 
 //
 onMounted(() => {
@@ -433,6 +452,7 @@ watch(selectedText, (text) => {
     text.scaleX = rScale;
     text.scaleY = rScale;
     scale.value = rScale;
+    lineHeight.value = text.lineHeight || 1.2;
   }
 }, { immediate: true });
 
@@ -457,6 +477,7 @@ const updateStyle = () => {
     textAlign: textAlign.value,
     scaleX: scale.value,
     scaleY: scale.value,
+    lineHeight: lineHeight.value,
   });
 
   // 履歴に保存
