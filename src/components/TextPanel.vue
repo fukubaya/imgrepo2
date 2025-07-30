@@ -29,36 +29,40 @@
         </div>
 
         <div class="style-section">
-          <div class="slider-with-value">
-            <label for="text-scale">スケール</label>
-            <input
-              type="range"
-              id="text-scale"
-              v-model.number="scale"
-              min="0.1"
-              max="50"
-              step="0.1"
-              @input="updateStyle"
-              class="style-slider"
-            />
-            <span class="value-display">{{ scale }}</span>
+          <div class="control-row">
+            <div class="slider-with-value">
+              <label for="text-scale">スケール</label>
+              <input
+                type="range"
+                id="text-scale"
+                v-model.number="scale"
+                min="0.1"
+                max="50"
+                step="0.1"
+                @input="updateStyle"
+                class="effect-slider"
+              />
+              <span class="value-display">{{ scale }}</span>
+            </div>
           </div>
         </div>
 
         <div class="style-section">
-          <div class="slider-with-value">
-            <label for="line-height">行の高さ</label>
-            <input
-              type="range"
-              id="line-height"
-              v-model.number="lineHeight"
-              min="0.5"
-              max="3"
-              step="0.1"
-              @input="updateStyle"
-              class="style-slider"
-            />
-            <span class="value-display">{{ lineHeight }}</span>
+          <div class="control-row">
+            <div class="slider-with-value">
+              <label for="line-height">行の高さ</label>
+              <input
+                type="range"
+                id="line-height"
+                v-model.number="lineHeight"
+                min="0.5"
+                max="3"
+                step="0.1"
+                @input="updateStyle"
+                class="effect-slider"
+              />
+              <span class="value-display">{{ lineHeight }}</span>
+            </div>
           </div>
         </div>
 
@@ -750,14 +754,6 @@ const applyPreset = (presetName: string) => {
   display: flex;
   align-items: center;
   gap: 10px;
-}
-
-.style-slider {
-  flex: 1;
-  height: 6px;
-  background-color: #eee;
-  border-radius: 3px;
-  outline: none;
 }
 
 .value-display {
