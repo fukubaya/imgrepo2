@@ -33,6 +33,15 @@
           <div class="control-row">
             <div class="slider-with-value">
               <label for="text-scale">スケール</label>
+              <button
+                class="step-btn"
+                @click="
+                  scale = Math.round((scale - 0.1) * 10) / 10;
+                  updateStyle();
+                "
+              >
+                -
+              </button>
               <input
                 type="range"
                 id="text-scale"
@@ -43,6 +52,15 @@
                 @input="updateStyle"
                 class="effect-slider"
               />
+              <button
+                class="step-btn"
+                @click="
+                  scale = Math.round((scale + 0.1) * 10) / 10;
+                  updateStyle();
+                "
+              >
+                +
+              </button>
               <span class="value-display">{{ scale }}</span>
             </div>
           </div>
@@ -52,6 +70,16 @@
           <div class="control-row">
             <div class="slider-with-value">
               <label for="line-height">行の高さ</label>
+              <button
+                class="step-btn"
+                @click="
+                  lineHeight = Math.round((lineHeight - 0.1) * 10)
+                    / 10;
+                  updateStyle();
+                "
+              >
+                -
+              </button>
               <input
                 type="range"
                 id="line-height"
@@ -62,6 +90,16 @@
                 @input="updateStyle"
                 class="effect-slider"
               />
+              <button
+                class="step-btn"
+                @click="
+                  lineHeight = Math.round((lineHeight + 0.1) * 10)
+                    / 10;
+                  updateStyle();
+                "
+              >
+                +
+              </button>
               <span class="value-display">{{ lineHeight }}</span>
             </div>
           </div>
@@ -139,6 +177,18 @@
           <div class="control-row">
             <div class="slider-with-value">
               <label for="background-color-opacity">透明度</label>
+              <button
+                class="step-btn"
+                @click="
+                  textColorOpacity = Math.max(
+                    0,
+                    Math.round((textColorOpacity - 0.05) * 100) / 100,
+                  );
+                  updateStyle();
+                "
+              >
+                -
+              </button>
               <input
                 type="range"
                 id="background-color-opacity"
@@ -149,6 +199,18 @@
                 @input="updateStyle"
                 class="effect-slider"
               />
+              <button
+                class="step-btn"
+                @click="
+                  textColorOpacity = Math.min(
+                    1,
+                    Math.round((textColorOpacity + 0.05) * 100) / 100,
+                  );
+                  updateStyle();
+                "
+              >
+                +
+              </button>
               <span class="value-display">{{
                   Math.round(
                     textColorOpacity * 100,
@@ -196,6 +258,15 @@
             <div class="control-row">
               <div class="slider-with-value">
                 <label for="shadow-blur">ぼかし</label>
+                <button
+                  class="step-btn"
+                  @click="
+                    shadowBlur = Math.max(0, shadowBlur - 1);
+                    updateShadow();
+                  "
+                >
+                  -
+                </button>
                 <input
                   type="range"
                   id="shadow-blur"
@@ -205,6 +276,15 @@
                   @input="updateShadow"
                   class="effect-slider"
                 />
+                <button
+                  class="step-btn"
+                  @click="
+                    shadowBlur = Math.min(50, shadowBlur + 1);
+                    updateShadow();
+                  "
+                >
+                  +
+                </button>
                 <span class="value-display">{{ shadowBlur }}px</span>
               </div>
             </div>
@@ -212,6 +292,18 @@
             <div class="control-row">
               <div class="slider-with-value">
                 <label for="shadow-offset-x">X</label>
+                <button
+                  class="step-btn"
+                  @click="
+                    shadowOffsetX = Math.max(
+                      -50,
+                      shadowOffsetX - 1,
+                    );
+                    updateShadow();
+                  "
+                >
+                  -
+                </button>
                 <input
                   type="range"
                   id="shadow-offset-x"
@@ -221,6 +313,15 @@
                   @input="updateShadow"
                   class="effect-slider"
                 />
+                <button
+                  class="step-btn"
+                  @click="
+                    shadowOffsetX = Math.min(50, shadowOffsetX + 1);
+                    updateShadow();
+                  "
+                >
+                  +
+                </button>
                 <span class="value-display">{{ shadowOffsetX }}px</span>
               </div>
             </div>
@@ -228,6 +329,18 @@
             <div class="control-row">
               <div class="slider-with-value">
                 <label for="shadow-offset-y">Y</label>
+                <button
+                  class="step-btn"
+                  @click="
+                    shadowOffsetY = Math.max(
+                      -50,
+                      shadowOffsetY - 1,
+                    );
+                    updateShadow();
+                  "
+                >
+                  -
+                </button>
                 <input
                   type="range"
                   id="shadow-offset-y"
@@ -237,6 +350,15 @@
                   @input="updateShadow"
                   class="effect-slider"
                 />
+                <button
+                  class="step-btn"
+                  @click="
+                    shadowOffsetY = Math.min(50, shadowOffsetY + 1);
+                    updateShadow();
+                  "
+                >
+                  +
+                </button>
                 <span class="value-display">{{ shadowOffsetY }}px</span>
               </div>
             </div>
@@ -271,6 +393,15 @@
             <div class="control-row">
               <div class="slider-with-value">
                 <label for="outline-width">太さ</label>
+                <button
+                  class="step-btn"
+                  @click="
+                    outlineWidth = Math.max(1, outlineWidth - 1);
+                    updateOutline();
+                  "
+                >
+                  -
+                </button>
                 <input
                   type="range"
                   id="outline-width"
@@ -280,6 +411,15 @@
                   @input="updateOutline"
                   class="effect-slider"
                 />
+                <button
+                  class="step-btn"
+                  @click="
+                    outlineWidth = Math.min(10, outlineWidth + 1);
+                    updateOutline();
+                  "
+                >
+                  +
+                </button>
                 <span class="value-display">{{ outlineWidth }}px</span>
               </div>
             </div>
@@ -313,6 +453,20 @@
             <div class="control-row">
               <div class="slider-with-value">
                 <label for="background-color-opacity">透明度</label>
+                <button
+                  class="step-btn"
+                  @click="
+                    backgroundColorOpacity = Math.max(
+                      0,
+                      Math.round(
+                        (backgroundColorOpacity - 0.05) * 100,
+                      ) / 100,
+                    );
+                    updateBackgroundColor();
+                  "
+                >
+                  -
+                </button>
                 <input
                   type="range"
                   id="background-color-opacity"
@@ -323,6 +477,20 @@
                   @input="updateBackgroundColor"
                   class="effect-slider"
                 />
+                <button
+                  class="step-btn"
+                  @click="
+                    backgroundColorOpacity = Math.min(
+                      1,
+                      Math.round(
+                        (backgroundColorOpacity + 0.05) * 100,
+                      ) / 100,
+                    );
+                    updateBackgroundColor();
+                  "
+                >
+                  +
+                </button>
                 <span class="value-display">{{
                     Math.round(
                       backgroundColorOpacity * 100,
@@ -471,10 +639,6 @@ const updateStyle = () => {
   if (!selectedText.value) return;
 
   const rgba = hexToRgb(textColor.value);
-  const rScale = roundToPointOne(
-    selectedText.value.scaleX || selectedText.value.scaleY || 1,
-  );
-  scale.value = rScale;
   updateTextStyle(selectedText.value, {
     fontFamily: fontFamily.value,
     fontSize: fontSize.value,
@@ -489,6 +653,7 @@ const updateStyle = () => {
     scaleY: scale.value,
     lineHeight: lineHeight.value,
   });
+  selectedText.value.setCoords();
 
   // 履歴に保存
   store.saveState();
@@ -824,7 +989,7 @@ const applyPreset = (presetName: string) => {
   gap: 20px;
 }
 
-.style-section label {
+  .style-section label {
   display: block;
   margin-bottom: 5px;
   font-size: 14px;
@@ -842,11 +1007,11 @@ const applyPreset = (presetName: string) => {
 .slider-with-value {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 5px;
 }
 
 .value-display {
-  min-width: 40px;
+  min-width: 30px;
   text-align: right;
   font-size: 14px;
   color: #555;
@@ -937,6 +1102,16 @@ const applyPreset = (presetName: string) => {
   text-align: right;
 }
 
+.step-btn {
+  padding: 0 8px;
+  background: #eee;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+.step-btn:hover {
+  background: #ddd;
+}
 .effect-slider {
   flex: 1;
   height: 6px;
@@ -946,7 +1121,7 @@ const applyPreset = (presetName: string) => {
 }
 
 .value-display {
-  min-width: 40px;
+  min-width: 30px;
   text-align: right;
   font-size: 13px;
   color: #555;
@@ -1066,7 +1241,7 @@ input:checked + .toggle-slider:before {
   }
 
   .effect-slider {
-    max-width: 33%;
+    width: 20%;
   }
 }
 </style>
