@@ -59,6 +59,13 @@
         >
           <span class="icon">T</span>
         </button>
+        <button
+          @click="addRect"
+          title="矩形追加"
+          class="toolbar-btn"
+        >
+          <span class="icon">⬜</span>
+        </button>
       </div>
 
       <div class="toolbar-group">
@@ -125,6 +132,7 @@
 import { Canvas } from "fabric";
 import { computed, onMounted, ref, watch } from "vue";
 import { useFabricCanvas } from "../composables/useFabricCanvas";
+import { useFabricRect } from "../composables/useFabricRect";
 import { useFabricText } from "../composables/useFabricText";
 import { DEFAULT_FONT } from "../constants/fonts";
 import { roundToPointOne } from "../lib/common";
@@ -162,6 +170,7 @@ const store = useEditorStore();
 // コンポーザブル
 const { initCanvas, setBackgroundImage } = useFabricCanvas();
 const { createText } = useFabricText();
+const { createRect } = useFabricRect();
 
 import { inject } from "vue";
 
@@ -250,6 +259,22 @@ const addTextFromPastedForm = () => {
 const addTextFromButton = () => {
   // ボタンからのテキスト追加
   addText("テキストを入力");
+};
+
+// 矩形の追加
+const addRect = () => {
+  if (!store.canvas) return;
+
+  const rect = createRect();
+  rect.set({
+    left: (store.canvas.width - rect.width * rect.scaleX) / 2,
+    top: (store.canvas.height - rect.height * rect.scaleY) / 2,
+  });
+
+  store.canvas.add(rect);
+  store.canvas.setActiveObject(rect);
+  store.canvas.requestRenderAll();
+  store.saveState();
 };
 
 // 新しいテキストの追加

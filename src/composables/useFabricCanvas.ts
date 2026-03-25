@@ -1,7 +1,7 @@
 import { ref } from "vue";
 
 // Fabric.jsをインポート
-import { Canvas, type CanvasOptions, FabricImage, Textbox, type TOptions } from "fabric";
+import { Canvas, type CanvasOptions, FabricImage, Rect, Textbox, type TOptions } from "fabric";
 
 /**
  * Fabric.jsキャンバスを操作するためのコンポーザブル
@@ -128,7 +128,7 @@ export function useFabricCanvas() {
    * @param canvas キャンバス
    * @param object 選択するオブジェクト
    */
-  const selectObject = (canvas: Canvas, object: Textbox) => {
+  const selectObject = (canvas: Canvas, object: Textbox | Rect) => {
     canvas.setActiveObject(object);
     canvas.requestRenderAll();
   };
