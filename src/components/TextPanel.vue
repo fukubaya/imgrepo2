@@ -9,6 +9,7 @@
       </div>
 
       <div class="panel-content" v-if="isTextSelected">
+        <!-- エフェクトコピー/ペースト -->
         <!-- フォント選択 -->
         <div class="style-section">
           <select
@@ -391,7 +392,12 @@ import { useEditorStore } from "../stores/editorStore";
 const store = useEditorStore();
 
 // コンポーザブル
-const { updateTextStyle, applyTextEffect } = useFabricText();
+const {
+  updateTextStyle,
+  applyTextEffect,
+  copyTextStylesAndEffects,
+  pasteTextStylesAndEffects,
+} = useFabricText();
 
 // フォントリスト
 const availableFonts = ref(AVAILABLE_FONTS);
@@ -487,6 +493,89 @@ const updateStyle = () => {
   // 履歴に保存
   store.saveState();
 };
+
+// エフェクトのコピー
+const copyEffects = () => {
+  if (!selectedText.value) return;
+  copyTextStylesAndEffects(selectedText.value);
+  store.saveState();
+};
+
+// エフェクトのペースト
+const pasteEffects = () => {
+  if (!selectedText.value) return;
+  pasteTextStylesAndEffects(selectedText.value);
+
+  // UI状態も更新
+  const text = selectedText.value;
+  if (text) {
+    // 影
+    const shadow = text.shadow;
+    hasShadow.value = !!shadow;
+    if (shadow) {
+      shadowColor.value = shadow.color as string || "#000000";
+      shadowBlur.value = shadow.blur;
+      shadowOffsetX.value = shadow.offsetX;
+      shadowOffsetY.value = shadow.offsetY;
+    } else {
+      hasShadow.value = false;
+    }
+
+    // アウトライン
+    hasOutline.value = !!text.stroke && text.strokeWidth! > 0;
+    if (text.stroke) {
+      outlineColor.value = text.stroke as string;
+      outlineWidth.value = text.strokeWidth === undefined
+        ? 1
+        : text.strokeWidth;
+    } else {
+      hasOutline.value = false;
+    }
+
+    // 背景色
+    hasBackgroundColor.value = !!text.textBackgroundColor;
+    if (text.textBackgroundColor) {
+      hasBackgroundColor.value = true;
+      // RGBA形式から色と透明度を抽出
+      const rgba = extractRGBA(
+        text.textBackgroundColor as string || "rgb(0 0 0 / 100%)",
+      );
+      backgroundColor.value = rgbToHex(rgba);
+      backgroundColorOpacity.value = rgba.a ? rgba.a / 100 : 1;
+    } else {
+      hasBackgroundColor.value = false;
+    }
+
+    // fillの色と透明度を設定
+    if (text.fill) {
+      const rgba = extractRGBA(text.fill as string);
+      textColor.value = rgbToHex(rgba);
+      textColorOpacity.value = rgba.a ? rgba.a / 100 : 1;
+    }
+
+    // スタイルも更新
+    const rgba = extractRGBA(text.fill as string || "rgb(0 0 0 / 100%)");
+    fontFamily.value = text.fontFamily || DEFAULT_FONT;
+    fontSize.value = text.fontSize || 30;
+    textColor.value = rgbToHex(rgba);
+    textColorOpacity.value = rgba.a ? rgba.a / 100.0 : 1;
+    isBold.value = text.fontWeight === "bold";
+    isItalic.value = text.fontStyle === "italic";
+    isUnderline.value = text.underline || false;
+    textAlign.value = text.textAlign || "left";
+    const rScale = roundToPointOne(text.scaleX || text.scaleY || 1);
+    text.scaleX = rScale;
+    text.scaleY = rScale;
+    scale.value = rScale;
+    lineHeight.value = text.lineHeight || 1.2;
+  }
+  store.saveState();
+};
+
+defineExpose({
+  copyEffects,
+  pasteEffects,
+});
 
 // 太字の切り替え
 const toggleBold = () => {
@@ -951,11 +1040,11 @@ input:checked + .toggle-slider:before {
   .text-panel {
     max-width: 100%;
   }
-  
+
   .panel-content {
     padding: 10px;
   }
-  
+
   .effect-section {
     margin-bottom: 15px;
     padding-bottom: 10px;

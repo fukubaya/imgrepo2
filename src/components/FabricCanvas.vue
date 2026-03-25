@@ -25,69 +25,98 @@
 
     <!-- ツールバー -->
     <div class="canvas-toolbar">
-      <button
-        @click="addTextFromClipboard"
-        title="クリップボードからテキスト追加"
-        class="toolbar-btn"
-      >
-        <span class="icon">📋T</span>
-      </button>
+      <div class="toolbar-group">
+        <button
+          @click="textPanel?.copyEffects()"
+          title="スタイルをコピー"
+          :disabled="!hasSelection"
+          class="toolbar-btn"
+        >
+          <span class="icon">📋</span>
+        </button>
+        <button
+          @click="textPanel?.pasteEffects()"
+          title="スタイルをペースト"
+          :disabled="!hasSelection"
+          class="toolbar-btn"
+        >
+          <span class="icon">🖌️</span>
+        </button>
+      </div>
 
-      <button
-        @click="addTextFromButton"
-        title="テキスト追加"
-        class="toolbar-btn"
-      >
-        <span class="icon">T</span>
-      </button>
-      <button
-        @click="deleteSelected"
-        title="選択オブジェクト削除"
-        :disabled="!hasSelection"
-        class="toolbar-btn"
-      >
-        <span class="icon">🗑</span>
-      </button>
-      <button
-        @click="duplicateSelected"
-        title="選択オブジェクト複製"
-        :disabled="!hasSelection"
-        class="toolbar-btn"
-      >
-        <span class="icon">+</span>
-      </button>
-      <button
-        @click="bringToFront"
-        title="最前面へ"
-        :disabled="!hasSelection"
-        class="toolbar-btn"
-      >
-        <span class="icon">↑↑</span>
-      </button>
-      <button
-        @click="sendToBack"
-        title="最背面へ"
-        :disabled="!hasSelection"
-        class="toolbar-btn"
-      >
-        <span class="icon">↓↓</span>
-      </button>
-      <button
-        @click="undo"
-        title="元に戻す"
-        :disabled="!canUndo"
-        class="toolbar-btn"
-      >
-        <span class="icon">↩</span>
-      </button>
-      <button
-        @click="redo"
-        title="やり直し"
-        :disabled="!canRedo"
-        class="toolbar-btn"
-      >
-        <span class="icon">↪</span>
-      </button>
+      <div class="toolbar-group">
+        <button
+          @click="addTextFromClipboard"
+          title="クリップボードからテキスト追加"
+          class="toolbar-btn"
+        >
+          <span class="icon">📋T</span>
+        </button>
+        <button
+          @click="addTextFromButton"
+          title="テキスト追加"
+          class="toolbar-btn"
+        >
+          <span class="icon">T</span>
+        </button>
+      </div>
+
+      <div class="toolbar-group">
+        <button
+          @click="deleteSelected"
+          title="選択オブジェクト削除"
+          :disabled="!hasSelection"
+          class="toolbar-btn"
+        >
+          <span class="icon">🗑</span>
+        </button>
+        <button
+          @click="duplicateSelected"
+          title="選択オブジェクト複製"
+          :disabled="!hasSelection"
+          class="toolbar-btn"
+        >
+          <span class="icon">+</span>
+        </button>
+      </div>
+
+      <div class="toolbar-group">
+        <button
+          @click="bringToFront"
+          title="最前面へ"
+          :disabled="!hasSelection"
+          class="toolbar-btn"
+        >
+          <span class="icon">↑↑</span>
+        </button>
+        <button
+          @click="sendToBack"
+          title="最背面へ"
+          :disabled="!hasSelection"
+          class="toolbar-btn"
+        >
+          <span class="icon">↓↓</span>
+        </button>
+      </div>
+
+      <div class="toolbar-group">
+        <button
+          @click="undo"
+          title="元に戻す"
+          :disabled="!canUndo"
+          class="toolbar-btn"
+        >
+          <span class="icon">↩</span>
+        </button>
+        <button
+          @click="redo"
+          title="やり直し"
+          :disabled="!canRedo"
+          class="toolbar-btn"
+        >
+          <span class="icon">↪</span>
+        </button>
+      </div>
     </div>
   </div>
 </template>
@@ -133,6 +162,11 @@ const store = useEditorStore();
 // コンポーザブル
 const { initCanvas, setBackgroundImage } = useFabricCanvas();
 const { createText } = useFabricText();
+
+import { inject } from "vue";
+
+// TextPanelへの参照
+const textPanel = inject<any>("textPanel");
 
 // 計算プロパティ
 const hasSelection = computed(() => store.hasSelection);
@@ -321,6 +355,7 @@ defineExpose({
   sendToBack,
   undo,
   redo,
+  textPanel,
 });
 </script>
 
@@ -346,12 +381,21 @@ defineExpose({
   left: 50%;
   transform: translateX(-50%);
   display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
   gap: 5px;
   background-color: rgba(255, 255, 255, 0.8);
   padding: 5px;
   border-radius: 5px;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
   z-index: 100;
+  max-width: 95%;
+  width: 95%;
+}
+
+.toolbar-group {
+  display: flex;
+  gap: 5px;
 }
 
 .toolbar-btn {
@@ -391,13 +435,13 @@ defineExpose({
     bottom: 5px;
     padding: 3px;
   }
-  
+
   .toolbar-btn {
     width: 36px;
     height: 36px;
     font-size: 14px;
   }
-  
+
   .icon {
     font-size: 16px;
   }
