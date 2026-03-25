@@ -172,6 +172,41 @@ export function useFabricText() {
     });
   };
 
+  let copiedStyles: Partial<TextboxProps & { textBackgroundColor?: string | null }> | null = null;
+
+  /**
+   * テキストスタイルとエフェクトをコピー
+   * @param textObject テキストオブジェクト
+   */
+  const copyTextStylesAndEffects = (textObject: Textbox) => {
+    copiedStyles = {
+      fontFamily: textObject.fontFamily,
+      fontSize: textObject.fontSize,
+      fill: textObject.fill,
+      fontWeight: textObject.fontWeight,
+      fontStyle: textObject.fontStyle,
+      underline: textObject.underline,
+      textAlign: textObject.textAlign,
+      scaleX: textObject.scaleX,
+      scaleY: textObject.scaleY,
+      lineHeight: textObject.lineHeight,
+      shadow: textObject.shadow,
+      stroke: textObject.stroke,
+      strokeWidth: textObject.strokeWidth,
+      textBackgroundColor: textObject.textBackgroundColor,
+    };
+  };
+
+  /**
+   * コピーしたテキストスタイルとエフェクトをペースト
+   * @param textObject テキストオブジェクト
+   */
+  const pasteTextStylesAndEffects = (textObject: Textbox) => {
+    if (copiedStyles) {
+      updateTextStyle(textObject, copiedStyles);
+    }
+  };
+
   return {
     createText,
     updateTextStyle,
@@ -180,5 +215,7 @@ export function useFabricText() {
     rotateText,
     updateTextContent,
     duplicateText,
+    copyTextStylesAndEffects,
+    pasteTextStylesAndEffects,
   };
 }

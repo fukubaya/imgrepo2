@@ -45,7 +45,7 @@
 
       <div class="sidebar" :class="{ 'has-selection': isTextSelected }">
         <div class="sidebar-section">
-          <TextPanel />
+          <TextPanel ref="textPanelRef" />
         </div>
       </div>
     </main>
@@ -63,7 +63,7 @@
 
 <script setup lang="ts">
 import type { Canvas } from "fabric";
-import { computed, onMounted, ref } from "vue";
+import { computed, onMounted, provide, ref } from "vue";
 import FabricCanvas from "./components/FabricCanvas.vue";
 import ImageUploader from "./components/ImageUploader.vue";
 import InstallPrompt from "./components/InstallPrompt.vue";
@@ -83,7 +83,11 @@ const { exportCanvas } = useFabricCanvas();
 
 // コンポーネント参照
 const canvasRef = ref<InstanceType<typeof FabricCanvas> | null>(null);
+const textPanelRef = ref<InstanceType<typeof TextPanel> | null>(null);
 const installPromptRef = ref<InstanceType<typeof InstallPrompt> | null>(null);
+
+// TextPanelをFabricCanvasで利用できるようにprovide
+provide("textPanel", textPanelRef);
 
 // 計算プロパティ
 const hasBackgroundImage = computed(() => store.hasBackgroundImage);
@@ -338,11 +342,11 @@ button {
     flex-direction: column;
     padding: 10px;
   }
-  
+
   .sidebar {
     width: 100%;
   }
-  
+
   .editor-container {
     min-height: 300px;
   }
@@ -353,20 +357,20 @@ button {
     height: 50px;
     padding: 0 10px;
   }
-  
+
   .app-title {
     font-size: 18px;
   }
-  
+
   .action-btn {
     padding: 6px 12px;
     font-size: 13px;
   }
-  
+
   .app-main {
     padding: 0;
   }
-  
+
   .app-footer {
     padding: 0 10px;
     font-size: 11px;
