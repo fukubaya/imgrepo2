@@ -1,4 +1,5 @@
-import { ref, onMounted } from 'vue';
+import { onMounted, ref } from "vue";
+import type { BeforeInstallPromptEvent } from "../types";
 
 /**
  * PWA関連機能のためのコンポーザブル
@@ -11,37 +12,37 @@ export function usePwa() {
   // 更新が利用可能かどうか
   const updateAvailable = ref(false);
   // インストールイベント
-  const deferredPrompt = ref<any>(null);
+  const deferredPrompt = ref<BeforeInstallPromptEvent | null>(null);
 
   // オンライン/オフライン状態の監視
   onMounted(() => {
     // オンライン状態の変更を監視
-    window.addEventListener('online', () => {
+    window.addEventListener("online", () => {
       isOffline.value = false;
     });
 
-    window.addEventListener('offline', () => {
+    window.addEventListener("offline", () => {
       isOffline.value = true;
     });
 
     // インストールプロンプトイベントの監視
-    window.addEventListener('beforeinstallprompt', (e) => {
+    window.addEventListener("beforeinstallprompt", (e: Event) => {
       // デフォルトの動作を防止
       e.preventDefault();
       // イベントを保存
-      deferredPrompt.value = e;
+      deferredPrompt.value = e as BeforeInstallPromptEvent;
       // インストール可能フラグを設定
       canInstall.value = true;
     });
 
     // インストール完了イベントの監視
-    window.addEventListener('appinstalled', () => {
+    window.addEventListener("appinstalled", () => {
       // インストールプロンプトをクリア
       deferredPrompt.value = null;
       // インストール可能フラグをリセット
       canInstall.value = false;
       // インストール完了をログに記録
-      console.log('PWA was installed');
+      console.log("PWA was installed");
     });
   });
 
@@ -64,9 +65,9 @@ export function usePwa() {
       canInstall.value = false;
 
       // ユーザーがインストールを選択したかどうか
-      return choiceResult.outcome === 'accepted';
+      return choiceResult.outcome === "accepted";
     } catch (error) {
-      console.error('インストールプロンプトエラー:', error);
+      console.error("インストールプロンプトエラー:", error);
       return false;
     }
   };
@@ -75,7 +76,7 @@ export function usePwa() {
    * Service Workerの更新をチェック
    */
   const checkForUpdates = () => {
-    if ('serviceWorker' in navigator) {
+    if ("serviceWorker" in navigator) {
       navigator.serviceWorker.ready.then((registration) => {
         registration.update();
       });
@@ -86,7 +87,7 @@ export function usePwa() {
    * 利用可能な更新を適用
    */
   const applyUpdate = () => {
-    if ('serviceWorker' in navigator) {
+    if ("serviceWorker" in navigator) {
       navigator.serviceWorker.ready.then((registration) => {
         registration.update().then(() => {
           // 更新が完了したらページをリロード
@@ -100,7 +101,7 @@ export function usePwa() {
    * キャッシュをクリア
    */
   const clearCache = async () => {
-    if ('caches' in window) {
+    if ("caches" in window) {
       try {
         // 利用可能なキャッシュの名前を取得
         const cacheNames = await caches.keys();
@@ -108,11 +109,11 @@ export function usePwa() {
         await Promise.all(
           cacheNames.map((cacheName) => {
             return caches.delete(cacheName);
-          })
+          }),
         );
         return true;
       } catch (error) {
-        console.error('キャッシュクリアエラー:', error);
+        console.error("キャッシュクリアエラー:", error);
         return false;
       }
     }
@@ -126,6 +127,6 @@ export function usePwa() {
     promptInstall,
     checkForUpdates,
     applyUpdate,
-    clearCache
+    clearCache,
   };
 }

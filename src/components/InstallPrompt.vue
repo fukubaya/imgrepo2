@@ -17,25 +17,25 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, watch } from 'vue';
-import { usePwa } from '../composables/usePwa';
+import { onMounted, ref, watch } from "vue";
+import { usePwa } from "../composables/usePwa";
 
 // プロパティ
 const props = defineProps({
   // 自動表示するまでの遅延（ミリ秒）
   autoShowDelay: {
     type: Number,
-    default: 5000
+    default: 5000,
   },
   // 一度閉じた後に再表示するまでの期間（日数）
   dismissPeriod: {
     type: Number,
-    default: 7
-  }
+    default: 7,
+  },
 });
 
 // イベント
-const emit = defineEmits(['installed', 'dismissed']);
+const emit = defineEmits(["installed", "dismissed"]);
 
 // コンポーザブル
 const { canInstall, promptInstall } = usePwa();
@@ -49,13 +49,17 @@ const isMobile = ref(false);
 // マウント時の処理
 onMounted(() => {
   // モバイル判定
-  isMobile.value = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-  
+  isMobile.value =
+    /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+      navigator.userAgent,
+    );
+
   // 過去に閉じた日時を確認
-  const lastDismissed = localStorage.getItem('pwa-prompt-dismissed');
-  const shouldShow = !lastDismissed || 
-    (Date.now() - parseInt(lastDismissed)) > (props.dismissPeriod * 24 * 60 * 60 * 1000);
-  
+  const lastDismissed = localStorage.getItem("pwa-prompt-dismissed");
+  const shouldShow = !lastDismissed
+    || (Date.now() - parseInt(lastDismissed))
+      > (props.dismissPeriod * 24 * 60 * 60 * 1000);
+
   // 自動表示の設定
   if (shouldShow) {
     setTimeout(() => {
@@ -67,10 +71,11 @@ onMounted(() => {
 // インストール可能状態の変化を監視
 watch(canInstall, (newValue) => {
   if (newValue) {
-    const lastDismissed = localStorage.getItem('pwa-prompt-dismissed');
-    const shouldShow = !lastDismissed || 
-      (Date.now() - parseInt(lastDismissed)) > (props.dismissPeriod * 24 * 60 * 60 * 1000);
-    
+    const lastDismissed = localStorage.getItem("pwa-prompt-dismissed");
+    const shouldShow = !lastDismissed
+      || (Date.now() - parseInt(lastDismissed))
+        > (props.dismissPeriod * 24 * 60 * 60 * 1000);
+
     if (shouldShow) {
       showPrompt.value = true;
     }
@@ -84,19 +89,19 @@ const installPWA = async () => {
   const installed = await promptInstall();
   if (installed) {
     showPrompt.value = false;
-    emit('installed');
+    emit("installed");
   }
 };
 
 // プロンプトを閉じる
 const dismissPrompt = () => {
   showPrompt.value = false;
-  
+
   // 閉じた日時を保存
-  localStorage.setItem('pwa-prompt-dismissed', Date.now().toString());
-  
+  localStorage.setItem("pwa-prompt-dismissed", Date.now().toString());
+
   // イベント発火
-  emit('dismissed');
+  emit("dismissed");
 };
 
 // 手動でプロンプトを表示
@@ -108,7 +113,7 @@ const showInstallPrompt = () => {
 
 // 外部に公開するメソッド
 defineExpose({
-  showInstallPrompt
+  showInstallPrompt,
 });
 </script>
 

@@ -1,7 +1,8 @@
-import type { FabricIText, FabricObject, TextOptions, TextEffectPreset } from '../types';
-
+import { markRaw } from "vue";
+import type { TextEffectPreset } from "../types";
 // Fabric.jsをインポート
-import { IText, Shadow } from 'fabric';
+import { Shadow, Textbox, type TextboxProps } from "fabric";
+import { DEFAULT_FONT } from "../constants/fonts";
 
 /**
  * Fabric.jsのテキスト操作のためのコンポーザブル
@@ -13,18 +14,22 @@ export function useFabricText() {
    * @param options テキストオプション
    * @returns テキストオブジェクト
    */
-  const createText = (text: string, options: Partial<TextOptions> = {}): FabricIText => {
+  const createText = (text: string, options: Partial<TextboxProps> = {}): Textbox => {
     // テキストオブジェクトの作成
-    return new IText(text, {
-      fontFamily: 'Arial',
-      fontSize: 30,
-      fill: '#000000',
-      fontWeight: 'normal',
-      fontStyle: 'normal',
-      textAlign: 'left',
-      editable: true, // 直接編集可能
-      ...options
-    });
+    return markRaw(
+      new Textbox(text, {
+        fontFamily: DEFAULT_FONT,
+        fontSize: 30,
+        fill: "rgb(0 0 0 / 100%)",
+        fontWeight: "normal",
+        fontStyle: "normal",
+        textAlign: "left",
+        editable: true,
+        paintFirst: "stroke",
+        textBackgroundColor: null,
+        ...options,
+      }),
+    );
   };
 
   /**
@@ -32,7 +37,10 @@ export function useFabricText() {
    * @param textObject テキストオブジェクト
    * @param styleOptions スタイルオプション
    */
-  const updateTextStyle = (textObject: FabricIText, styleOptions: Partial<TextOptions>) => {
+  const updateTextStyle = (
+    textObject: Textbox,
+    styleOptions: Partial<TextboxProps & { textBackgroundColor?: string | null }>,
+  ) => {
     // スタイルを適用
     textObject.set(styleOptions);
 
@@ -47,9 +55,9 @@ export function useFabricText() {
    * @param textObject テキストオブジェクト
    * @param effect 効果プリセット
    */
-  const applyTextEffect = (textObject: FabricIText, effect: TextEffectPreset) => {
+  const applyTextEffect = (textObject: Textbox, effect: TextEffectPreset) => {
     // 効果のオプションを作成
-    const effectOptions: Partial<TextOptions> = {};
+    const effectOptions: Partial<TextboxProps & { textBackgroundColor?: string | null }> = {};
 
     // 影の設定
     if (effect.shadow) {
@@ -57,7 +65,7 @@ export function useFabricText() {
         color: effect.shadow.color,
         blur: effect.shadow.blur,
         offsetX: effect.shadow.offsetX,
-        offsetY: effect.shadow.offsetY
+        offsetY: effect.shadow.offsetY,
       });
     } else {
       effectOptions.shadow = null;
@@ -70,6 +78,13 @@ export function useFabricText() {
     } else {
       effectOptions.stroke = null;
       effectOptions.strokeWidth = 0;
+    }
+
+    // 背景色の設定
+    if (effect.textBackgroundColor) {
+      effectOptions.textBackgroundColor = effect.textBackgroundColor; // 直接文字色を設定
+    } else {
+      effectOptions.textBackgroundColor = null;
     }
 
     // フォントスタイルの設定
@@ -95,10 +110,10 @@ export function useFabricText() {
    * @param left X座標
    * @param top Y座標
    */
-  const setTextPosition = (textObject: FabricIText, left: number, top: number) => {
+  const setTextPosition = (textObject: Textbox, left: number, top: number) => {
     textObject.set({
       left,
-      top
+      top,
     });
 
     // キャンバスの再描画をリクエスト
@@ -112,9 +127,9 @@ export function useFabricText() {
    * @param textObject テキストオブジェクト
    * @param angle 角度（度）
    */
-  const rotateText = (textObject: FabricIText, angle: number) => {
+  const rotateText = (textObject: Textbox, angle: number) => {
     textObject.set({
-      angle
+      angle,
     });
 
     // キャンバスの再描画をリクエスト
@@ -128,9 +143,9 @@ export function useFabricText() {
    * @param textObject テキストオブジェクト
    * @param newText 新しいテキスト内容
    */
-  const updateTextContent = (textObject: FabricIText, newText: string) => {
+  const updateTextContent = (textObject: Textbox, newText: string) => {
     textObject.set({
-      text: newText
+      text: newText,
     });
 
     // キャンバスの再描画をリクエスト
@@ -144,8 +159,8 @@ export function useFabricText() {
    * @param textObject テキストオブジェクト
    * @param callback 複製完了時のコールバック
    */
-  const duplicateText = (textObject: FabricIText, callback: (cloned: FabricIText) => void) => {
-    textObject.clone((cloned: FabricObject) => {
+  const duplicateText = (textObject: Textbox, callback: (cloned: Textbox) => void) => {
+    textObject.clone().then((cloned: Textbox) => {
       // 少しオフセットして配置
       cloned.set({
         left: (textObject.left || 0) + 20,
@@ -153,7 +168,7 @@ export function useFabricText() {
         evented: true,
       });
 
-      callback(cloned as FabricIText);
+      callback(cloned);
     });
   };
 
@@ -164,6 +179,6 @@ export function useFabricText() {
     setTextPosition,
     rotateText,
     updateTextContent,
-    duplicateText
+    duplicateText,
   };
 }

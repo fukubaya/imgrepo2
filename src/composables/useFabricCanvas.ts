@@ -1,15 +1,14 @@
-import { ref } from 'vue';
-import type { FabricCanvas, FabricObject } from '../types';
+import { ref } from "vue";
 
 // Fabric.jsをインポート
-import { Canvas, Image } from 'fabric';
+import { Canvas, type CanvasOptions, FabricImage, Textbox, type TOptions } from "fabric";
 
 /**
  * Fabric.jsキャンバスを操作するためのコンポーザブル
  */
 export function useFabricCanvas() {
   // キャンバス参照
-  const canvas = ref<FabricCanvas | null>(null);
+  const canvas = ref<Canvas | null>(null);
 
   /**
    * キャンバスの初期化
@@ -17,12 +16,12 @@ export function useFabricCanvas() {
    * @param options キャンバスオプション
    * @returns 初期化されたキャンバス
    */
-  const initCanvas = (canvasEl: HTMLCanvasElement, options: any = {}): FabricCanvas => {
+  const initCanvas = (canvasEl: HTMLCanvasElement, options: TOptions<CanvasOptions> = {}): Canvas => {
     // Fabric.jsキャンバスの作成
     const fabricCanvas = new Canvas(canvasEl, {
       preserveObjectStacking: true, // オブジェクトの重ね順を維持
       selection: true, // 複数選択を有効化
-      ...options
+      ...options,
     });
 
     // キャンバス参照を設定
@@ -37,66 +36,91 @@ export function useFabricCanvas() {
    * @param imageUrl 画像URL
    * @returns Promise
    */
-  const setBackgroundImage = (canvas: FabricCanvas, imageUrl: string): Promise<void> => {
+  const setBackgroundImage = (fCanvas: Canvas, imageUrl: string): Promise<void> => {
     return new Promise((resolve, reject) => {
-      console.log('setBackgroundImage called with:', imageUrl.substring(0, 50) + '...');
-      
+      console.log("setBackgroundImage called with:", imageUrl.substring(0, 50) + "...");
+
       // Fabric.jsのImage.fromURLを使用して画像を読み込む
-      Image.fromURL(imageUrl, (fabricImage) => {
+      FabricImage.fromURL(imageUrl).then((fabricImage: FabricImage) => {
         if (!fabricImage) {
-          console.error('Failed to load image');
-          reject(new Error('画像の読み込みに失敗しました'));
+          console.error("Failed to load image");
+          reject(new Error("画像の読み込みに失敗しました"));
           return;
         }
-        
+
         try {
-          // キャンバスのサイズを取得
-          const canvasWidth = canvas.width || 800;
-          const canvasHeight = canvas.height || 600;
-          
-          // 画像のサイズを取得
-          const imgWidth = fabricImage.width || 1;
-          const imgHeight = fabricImage.height || 1;
-          
-          // 画像のアスペクト比を維持しながらキャンバスに合わせる
-          const scale = Math.min(
-            canvasWidth / imgWidth,
-            canvasHeight / imgHeight
-          );
-          
-          // 画像をキャンバスの中央に配置
+          const scale = resizeCanvas(fCanvas, fabricImage);
+
+          // 画像を配置
           fabricImage.set({
-            scaleX: scale,
-            scaleY: scale,
-            left: (canvasWidth - imgWidth * scale) / 2,
-            top: (canvasHeight - imgHeight * scale) / 2,
-            selectable: false, // 選択不可
-            evented: false, // イベント無効
+            left: 0,
+            top: 0,
+            selectable: false,
+            evented: false,
           });
-          
+
           // 背景として設定
-          canvas.setBackgroundImage(fabricImage, canvas.renderAll.bind(canvas));
-          console.log('Background image set successfully');
+          fCanvas.backgroundImage = fabricImage;
+          fCanvas.setZoom(scale);
+          fCanvas.renderAll();
+          console.log("Background image set successfully");
           resolve();
         } catch (error) {
-          console.error('Error setting background image:', error);
+          console.error("Error setting background image:", error);
           reject(error);
         }
-      }, { crossOrigin: 'anonymous' }); // CORS対応
+      });
     });
   };
 
-  /**
-   * キャンバスのリサイズ
-   * @param canvas キャンバス
-   * @param width 幅
-   * @param height 高さ
-   */
-  const resizeCanvas = (canvas: FabricCanvas, width: number, height: number) => {
-    // キャンバスのサイズを設定
-    canvas.setWidth(width);
-    canvas.setHeight(height);
-    canvas.requestRenderAll();
+  const resizeCanvas = (fCanvas: Canvas, fabricImage: FabricImage): number => {
+    if (!fabricImage) {
+      return 1.0;
+    }
+
+    const containerWidth = fCanvas.wrapperEl.parentElement?.offsetWidth || fCanvas.width;
+    const containerHeight = fCanvas.wrapperEl.parentElement?.offsetHeight || fCanvas.height;
+
+    // 画像のサイズを取得
+    const imgWidth = fabricImage.width || 1;
+    const imgHeight = fabricImage.height || 1;
+
+    // 画像のアスペクト比を維持しながらキャンバスのサイズを調整
+    const scaleX = containerWidth / imgWidth;
+    const scaleY = containerHeight / imgHeight;
+    let scale = Math.min(scaleX, scaleY);
+    fCanvas.width = imgWidth;
+    fCanvas.height = imgHeight;
+
+    // キャンバスのラッパー要素のサイズを設定
+    let elWidth;
+    let elHeight;
+    // アスペクト比に基づいてキャンバスのサイズを設定
+    if (containerWidth <= 600) {
+      // スマートフォンや小さい画面の場合、幅を優先
+      elWidth = containerWidth;
+      elHeight = containerWidth * (imgHeight / imgWidth);
+      scale = scaleX;
+      fCanvas.wrapperEl.parentElement!.style.width = elWidth + "px";
+      fCanvas.wrapperEl.parentElement!.style.height = elHeight + "px";
+
+      fCanvas.wrapperEl.parentElement!.parentElement!.style.width = elWidth + "px";
+      fCanvas.wrapperEl.parentElement!.parentElement!.style.height = elHeight + "px";
+
+      fCanvas.wrapperEl.parentElement!.parentElement!.parentElement!.style.width = elWidth + "px";
+      fCanvas.wrapperEl.parentElement!.parentElement!.parentElement!.style.height = elHeight + "px";
+    } else if (scaleX > scaleY) {
+      elWidth = containerHeight * (imgWidth / imgHeight);
+      elHeight = containerHeight;
+    } else {
+      elWidth = containerWidth;
+      elHeight = containerWidth * (imgHeight / imgWidth);
+    }
+
+    fCanvas.wrapperEl.style.width = elWidth + "px";
+    fCanvas.wrapperEl.style.height = elHeight + "px";
+
+    return scale;
   };
 
   /**
@@ -104,7 +128,7 @@ export function useFabricCanvas() {
    * @param canvas キャンバス
    * @param object 選択するオブジェクト
    */
-  const selectObject = (canvas: FabricCanvas, object: FabricObject) => {
+  const selectObject = (canvas: Canvas, object: Textbox) => {
     canvas.setActiveObject(object);
     canvas.requestRenderAll();
   };
@@ -113,7 +137,7 @@ export function useFabricCanvas() {
    * 選択の解除
    * @param canvas キャンバス
    */
-  const deselectAll = (canvas: FabricCanvas) => {
+  const deselectAll = (canvas: Canvas) => {
     canvas.discardActiveObject();
     canvas.requestRenderAll();
   };
@@ -125,22 +149,29 @@ export function useFabricCanvas() {
    * @returns データURL
    */
   const exportCanvas = (
-    canvas: FabricCanvas,
-    options: { format?: 'png' | 'jpeg'; quality?: number } = {}
+    canvas: Canvas,
+    options: { format?: "png" | "jpeg"; quality?: number } = {},
   ): string => {
-    const { format = 'png', quality = 1 } = options;
+    const { format = "png", quality = 1 } = options;
 
     // 選択状態を一時的に解除
     const activeObject = canvas.getActiveObject();
+    const z = canvas.getZoom();
     canvas.discardActiveObject();
     canvas.requestRenderAll();
+
+    // zoomを一時的に戻す
+    canvas.setZoom(1.0);
 
     // 画像としてエクスポート
     const dataUrl = canvas.toDataURL({
       format,
       quality,
-      multiplier: 2 // 高解像度
+      multiplier: 1.0,
     });
+
+    // zoomを戻す
+    canvas.setZoom(z);
 
     // 選択状態を復元
     if (activeObject) {
@@ -158,6 +189,6 @@ export function useFabricCanvas() {
     resizeCanvas,
     selectObject,
     deselectAll,
-    exportCanvas
+    exportCanvas,
   };
 }

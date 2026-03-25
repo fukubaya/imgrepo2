@@ -3,11 +3,27 @@
     <header class="app-header">
       <h1 class="app-title">画像テキストエディタ</h1>
       <div class="app-actions">
-        <button @click="exportImage" class="action-btn export-btn" :disabled="!hasBackgroundImage">
-          <span class="icon">💾</span> 保存
+        <button
+          @click="exportImage"
+          class="action-btn export-btn"
+          :disabled="!hasBackgroundImage"
+        >
+          <span class="icon">💾</span>
         </button>
-        <button v-if="isMobile && canShare" @click="shareImage" class="action-btn share-btn" :disabled="!hasBackgroundImage">
-          <span class="icon">📤</span> 共有
+        <button
+          v-if="isMobile && canShare"
+          @click="shareImage"
+          class="action-btn share-btn"
+          :disabled="!hasBackgroundImage"
+        >
+          <span class="icon">📤</span>
+        </button>
+        <button
+          v-if="hasBackgroundImage"
+          @click="clearImage"
+          class="action-btn"
+        >
+          <span class="icon">❌</span>
         </button>
       </div>
     </header>
@@ -18,23 +34,18 @@
           <ImageUploader @image-loaded="onImageLoaded" />
         </div>
         <div v-else class="canvas-container">
-          <FabricCanvas ref="canvasRef" @object-selected="onObjectSelected" />
+          <FabricCanvas
+            ref="canvasRef"
+            @object-selected="onObjectSelected"
+            :width="1920"
+            :height="1080"
+          />
         </div>
       </div>
 
       <div class="sidebar" :class="{ 'has-selection': isTextSelected }">
-        <div v-if="hasBackgroundImage" class="sidebar-section">
-          <button @click="clearImage" class="sidebar-btn">
-            <span class="icon">🖼️</span> 画像を変更
-          </button>
-        </div>
-        
         <div class="sidebar-section">
-          <TextStylePanel />
-        </div>
-        
-        <div class="sidebar-section">
-          <TextEffectsPanel />
+          <TextPanel />
         </div>
       </div>
     </main>
@@ -51,15 +62,16 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue';
-import { useEditorStore } from './stores/editorStore';
-import { useFileHandling } from './composables/useFileHandling';
-import { usePwa } from './composables/usePwa';
-import FabricCanvas from './components/FabricCanvas.vue';
-import TextStylePanel from './components/TextStylePanel.vue';
-import TextEffectsPanel from './components/TextEffectsPanel.vue';
-import ImageUploader from './components/ImageUploader.vue';
-import InstallPrompt from './components/InstallPrompt.vue';
+import type { Canvas } from "fabric";
+import { computed, onMounted, ref } from "vue";
+import FabricCanvas from "./components/FabricCanvas.vue";
+import ImageUploader from "./components/ImageUploader.vue";
+import InstallPrompt from "./components/InstallPrompt.vue";
+import TextPanel from "./components/TextPanel.vue";
+import { useFabricCanvas } from "./composables/useFabricCanvas";
+import { useFileHandling } from "./composables/useFileHandling";
+import { usePwa } from "./composables/usePwa";
+import { useEditorStore } from "./stores/editorStore";
 
 // ストア
 const store = useEditorStore();
@@ -67,6 +79,7 @@ const store = useEditorStore();
 // コンポーザブル
 const { downloadImage, shareImage: shareImageFile } = useFileHandling();
 const { isOffline } = usePwa();
+const { exportCanvas } = useFabricCanvas();
 
 // コンポーネント参照
 const canvasRef = ref<InstanceType<typeof FabricCanvas> | null>(null);
@@ -87,30 +100,31 @@ const canShare = computed(() => {
 // マウント時の処理
 onMounted(() => {
   // モバイル判定
-  isMobile.value = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+  isMobile.value =
+    /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+      navigator.userAgent,
+    );
 });
 
 // 画像読み込み時の処理
 const onImageLoaded = (dataUrl: string) => {
-  console.log('画像が読み込まれました:', dataUrl.substring(0, 50) + '...');
-  
+  console.log("画像が読み込まれました:", dataUrl.substring(0, 50) + "...");
+
   // 明示的に背景画像を設定
   store.setBackgroundImage(dataUrl);
-  
+
   // 少し遅延を入れてUIの更新を確実にする
   setTimeout(() => {
     if (canvasRef.value) {
-      console.log('キャンバスが利用可能です');
+      console.log("キャンバスが利用可能です");
     } else {
-      console.log('キャンバスがまだ利用可能ではありません');
+      console.log("キャンバスがまだ利用可能ではありません");
     }
   }, 100);
 };
 
 // オブジェクト選択時の処理
-const onObjectSelected = (object: any) => {
-  // 選択状態の更新はFabricCanvasコンポーネント内で行われる
-};
+const onObjectSelected = () => {};
 
 // 画像のクリア
 const clearImage = () => {
@@ -120,32 +134,42 @@ const clearImage = () => {
 // 画像のエクスポート
 const exportImage = () => {
   if (!store.canvas) return;
-  
+
   // キャンバスをエクスポート
-  const dataUrl = store.exportCanvas('png');
+  const dataUrl = exportCanvas(store.canvas as unknown as Canvas, {
+    format: "jpeg",
+  });
   if (dataUrl) {
     // ファイル名の生成（現在日時を含む）
     const now = new Date();
-    const dateStr = `${now.getFullYear()}${(now.getMonth() + 1).toString().padStart(2, '0')}${now.getDate().toString().padStart(2, '0')}_${now.getHours().toString().padStart(2, '0')}${now.getMinutes().toString().padStart(2, '0')}`;
+    const dateStr = `${now.getFullYear()}${
+      (now.getMonth() + 1).toString().padStart(2, "0")
+    }${now.getDate().toString().padStart(2, "0")}_${
+      now.getHours().toString().padStart(2, "0")
+    }${now.getMinutes().toString().padStart(2, "0")}`;
     const filename = `image_editor_${dateStr}`;
-    
+
     // ダウンロード
-    downloadImage(dataUrl, filename, 'png');
+    downloadImage(dataUrl, filename, "jpg");
   }
 };
 
 // 画像の共有（モバイル向け）
 const shareImage = async () => {
   if (!store.canvas) return;
-  
+
   // キャンバスをエクスポート
-  const dataUrl = store.exportCanvas('png');
+  const dataUrl = exportCanvas(store.canvas as unknown as Canvas, {
+    format: "jpeg",
+  });
   if (dataUrl) {
     // ファイル名の生成
-    const filename = `画像テキストエディタ_${new Date().toISOString().split('T')[0]}`;
-    
+    const filename = `画像テキストエディタ_${
+      new Date().toISOString().split("T")[0]
+    }`;
+
     // 共有
-    await shareImageFile(dataUrl, filename, 'png');
+    await shareImageFile(dataUrl, filename, "jpg");
   }
 };
 </script>
@@ -205,6 +229,7 @@ button {
 .app-title {
   font-size: 20px;
   font-weight: 600;
+  font-family: -apple-system, 'Toppan Bunkyu Midashi Gothic Extrabold';
 }
 
 .app-actions {
@@ -256,7 +281,6 @@ button {
 
 .editor-container {
   flex: 1;
-  min-height: 400px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -265,7 +289,12 @@ button {
 .upload-container, .canvas-container {
   width: 100%;
   height: 100%;
-  min-height: 400px;
+}
+.canvas-container {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
 }
 
 .sidebar {
@@ -277,24 +306,6 @@ button {
 
 .sidebar-section {
   margin-bottom: 20px;
-}
-
-.sidebar-btn {
-  width: 100%;
-  padding: 10px;
-  background-color: var(--card-background);
-  border: 1px solid var(--border-color);
-  border-radius: 4px;
-  font-size: 14px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 5px;
-  transition: all 0.2s;
-}
-
-.sidebar-btn:hover {
-  background-color: #f0f0f0;
 }
 
 .app-footer {
@@ -353,7 +364,7 @@ button {
   }
   
   .app-main {
-    padding: 10px;
+    padding: 0;
   }
   
   .app-footer {

@@ -3,27 +3,89 @@
     <!-- キャンバス要素 -->
     <canvas ref="canvasEl" class="fabric-canvas"></canvas>
 
+    <teleport to="#paste-form" v-if="showPasteForm" class="paste-form-overlay">
+      <div class="paste-form-modal">
+        <h3>テキストをここに貼り付け</h3>
+        <textarea
+          v-model="pasteTextContent"
+          @paste="handlePaste"
+          placeholder="ここにテキストをペーストしてください..."
+          rows="1"
+        ></textarea>
+        <div class="form-actions">
+          <button @click="showPasteForm = false" class="btn-secondary">
+            キャンセル
+          </button>
+        </div>
+      </div>
+    </teleport>
+
+    <!-- 貼り付けフォーム -->
+    <div id="paste-form" />
+
     <!-- ツールバー -->
     <div class="canvas-toolbar">
-      <button @click="addText" title="テキスト追加" class="toolbar-btn">
+      <button
+        @click="addTextFromClipboard"
+        title="クリップボードからテキスト追加"
+        class="toolbar-btn"
+      >
+        <span class="icon">📋T</span>
+      </button>
+
+      <button
+        @click="addTextFromButton"
+        title="テキスト追加"
+        class="toolbar-btn"
+      >
         <span class="icon">T</span>
       </button>
-      <button @click="deleteSelected" title="選択オブジェクト削除" :disabled="!hasSelection" class="toolbar-btn">
+      <button
+        @click="deleteSelected"
+        title="選択オブジェクト削除"
+        :disabled="!hasSelection"
+        class="toolbar-btn"
+      >
         <span class="icon">🗑</span>
       </button>
-      <button @click="duplicateSelected" title="選択オブジェクト複製" :disabled="!hasSelection" class="toolbar-btn">
+      <button
+        @click="duplicateSelected"
+        title="選択オブジェクト複製"
+        :disabled="!hasSelection"
+        class="toolbar-btn"
+      >
         <span class="icon">+</span>
       </button>
-      <button @click="bringToFront" title="最前面へ" :disabled="!hasSelection" class="toolbar-btn">
+      <button
+        @click="bringToFront"
+        title="最前面へ"
+        :disabled="!hasSelection"
+        class="toolbar-btn"
+      >
         <span class="icon">↑↑</span>
       </button>
-      <button @click="sendToBack" title="最背面へ" :disabled="!hasSelection" class="toolbar-btn">
+      <button
+        @click="sendToBack"
+        title="最背面へ"
+        :disabled="!hasSelection"
+        class="toolbar-btn"
+      >
         <span class="icon">↓↓</span>
       </button>
-      <button @click="undo" title="元に戻す" :disabled="!canUndo" class="toolbar-btn">
+      <button
+        @click="undo"
+        title="元に戻す"
+        :disabled="!canUndo"
+        class="toolbar-btn"
+      >
         <span class="icon">↩</span>
       </button>
-      <button @click="redo" title="やり直し" :disabled="!canRedo" class="toolbar-btn">
+      <button
+        @click="redo"
+        title="やり直し"
+        :disabled="!canRedo"
+        class="toolbar-btn"
+      >
         <span class="icon">↪</span>
       </button>
     </div>
@@ -31,25 +93,36 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed, watch, onBeforeUnmount } from 'vue';
-import { useEditorStore } from '../stores/editorStore';
-import { useFabricCanvas } from '../composables/useFabricCanvas';
-import { useFabricText } from '../composables/useFabricText';
+import { Canvas } from "fabric";
+import { computed, onMounted, ref, watch } from "vue";
+import { useFabricCanvas } from "../composables/useFabricCanvas";
+import { useFabricText } from "../composables/useFabricText";
+import { DEFAULT_FONT } from "../constants/fonts";
+import { roundToPointOne } from "../lib/common";
+import { useEditorStore } from "../stores/editorStore";
+
+// 状態
+const showPasteForm = ref(false);
+const pasteTextContent = ref("");
 
 // プロパティ
 const props = defineProps({
   width: {
     type: Number,
-    default: 800
+    default: 800,
   },
   height: {
     type: Number,
-    default: 600
-  }
+    default: 600,
+  },
 });
 
 // イベント
-const emit = defineEmits(['canvas-ready', 'object-selected', 'object-modified']);
+const emit = defineEmits([
+  "canvas-ready",
+  "object-selected",
+  "object-modified",
+]);
 
 // キャンバス要素の参照
 const canvasEl = ref<HTMLCanvasElement | null>(null);
@@ -58,7 +131,7 @@ const canvasEl = ref<HTMLCanvasElement | null>(null);
 const store = useEditorStore();
 
 // コンポーザブル
-const { initCanvas, setBackgroundImage, resizeCanvas } = useFabricCanvas();
+const { initCanvas, setBackgroundImage } = useFabricCanvas();
 const { createText } = useFabricText();
 
 // 計算プロパティ
@@ -70,85 +143,120 @@ const canRedo = computed(() => store.canRedo);
 onMounted(() => {
   if (canvasEl.value) {
     // キャンバスの初期化
-    const canvas = initCanvas(canvasEl.value, {
-      width: props.width,
-      height: props.height,
-      selection: true, // グループ選択を有効化
-      preserveObjectStacking: true, // オブジェクトの重ね順を維持
-    });
-    
-    // ストアにキャンバスを設定
-    store.setCanvas(canvas);
-    
-    // イベントリスナーの設定
-    canvas.on('selection:created', handleSelection);
-    canvas.on('selection:updated', handleSelection);
-    canvas.on('selection:cleared', () => store.setSelectedObject(null));
-    canvas.on('object:modified', () => {
-      store.saveState();
-      emit('object-modified');
-    });
-    canvas.on('text:changed', () => store.saveState());
-    
-    // 背景画像の設定（もし存在すれば）
-    if (store.backgroundImage) {
-      setBackgroundImage(canvas, store.backgroundImage);
-    }
-    
-    // 初期状態を保存
-    store.saveState();
-    
-    // キャンバス準備完了イベントを発火
-    emit('canvas-ready', canvas);
-    
-    // ウィンドウリサイズ時のキャンバスサイズ調整
-    const handleResize = () => {
-      const container = canvasEl.value?.parentElement;
-      if (container) {
-        const width = container.clientWidth;
-        const height = container.clientHeight;
-        resizeCanvas(canvas, width, height);
+    try {
+      const canvas = initCanvas(canvasEl.value, {
+        width: props.width,
+        height: props.height,
+        selection: true, // グループ選択を有効化
+        preserveObjectStacking: true, // オブジェクトの重ね順を維持
+      });
+
+      // ストアにキャンバスを設定
+      store.setCanvas(canvas);
+
+      // イベントリスナーの設定
+      canvas.on("selection:created", handleSelection);
+      canvas.on("selection:updated", handleSelection);
+      canvas.on("selection:cleared", () => store.setSelectedObject(null));
+      canvas.on("object:modified", () => {
+        store.saveState();
+        emit("object-modified");
+      });
+      canvas.on("text:changed", () => store.saveState());
+
+      // 背景画像の設定（もし存在すれば）
+      if (store.backgroundImage) {
+        setBackgroundImage(canvas, store.backgroundImage);
       }
-    };
-    
-    window.addEventListener('resize', handleResize);
-    onBeforeUnmount(() => {
-      window.removeEventListener('resize', handleResize);
-    });
+
+      // 初期状態を保存
+      store.saveState();
+
+      // キャンバス準備完了イベントを発火
+      emit("canvas-ready", canvas);
+    } catch (error) {
+      console.error("キャンバス初期化エラー:", error);
+    }
   }
 });
 
 // 選択オブジェクトの処理
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const handleSelection = (e: any) => {
   const selected = e.selected?.[0] || e.target;
   store.setSelectedObject(selected);
-  emit('object-selected', selected);
+  emit("object-selected", selected);
+};
+
+// クリップボードからテキストを追加（フォーム表示）
+const addTextFromClipboard = () => {
+  showPasteForm.value = true;
+  pasteTextContent.value = ""; // フォームを開く際に内容をクリア
+};
+
+// 貼り付けイベントハンドラ
+const handlePaste = (event: ClipboardEvent) => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const clipboardData = event.clipboardData || (window as any).clipboardData;
+  if (clipboardData) {
+    pasteTextContent.value = clipboardData.getData("text");
+    addTextFromPastedForm(); // 貼り付け時に自動でテキストを追加
+  }
+};
+
+// フォームからテキストを追加
+const addTextFromPastedForm = () => {
+  addText(pasteTextContent.value || "テキストを入力");
+  // フォームを閉じる
+  showPasteForm.value = false;
+  pasteTextContent.value = "";
+};
+
+// ボタンからのテキスト追加
+const addTextFromButton = () => {
+  // ボタンからのテキスト追加
+  addText("テキストを入力");
 };
 
 // 新しいテキストの追加
-const addText = () => {
+const addText = (t: string = "") => {
   if (!store.canvas) return;
-  
+
   // キャンバスの中央に新しいテキストを作成
-  const text = createText('テキストを入力', {
-    left: store.canvas.width! / 2,
-    top: store.canvas.height! / 2,
-    fontFamily: 'Arial',
+  const scale = roundToPointOne(1 / store.canvas.getZoom());
+  const text = createText(t || "テキストを入力", {
+    left: 0,
+    top: 0,
+    fontFamily: DEFAULT_FONT,
     fontSize: 30,
-    fill: '#000000',
-    editable: true, // 直接編集可能に
+    fill: "#000000",
+    scaleX: scale,
+    scaleY: scale,
   });
-  
+
+  // キャンバスのサイズの90%を超える場合は縮小する
+  const upperRate = 0.9;
+  if (
+    text.width * scale > store.canvas.width * upperRate
+    || text.height * scale > store.canvas.height * upperRate
+  ) {
+    const r = Math.min(
+      store.canvas.width * upperRate / (text.width * scale),
+      store.canvas.height * upperRate / (text.height * scale),
+    );
+    const rScale = roundToPointOne(r * scale);
+    text.scaleX = rScale;
+    text.scaleY = rScale;
+  }
+
+  // テキストの位置を中央に設定
+  text.top = (store.canvas.height - text.height * text.scaleY) / 2;
+  text.left = (store.canvas.width - text.width * text.scaleX) / 2;
+
   store.canvas.add(text);
   store.canvas.setActiveObject(text);
   store.canvas.requestRenderAll();
-  
-  // 編集モードをアクティブに
-  text.enterEditing();
-  
-  // 選択状態を更新
-  store.setSelectedObject(text);
-  
+
   // 履歴に保存
   store.saveState();
 };
@@ -185,13 +293,21 @@ const redo = () => {
 
 // 背景画像の変更を監視
 watch(() => store.backgroundImage, async (newImage) => {
-  if (store.canvas && newImage) {
-    console.log('背景画像を設定します:', newImage);
-    try {
-      await setBackgroundImage(store.canvas, newImage);
-      store.saveState();
-    } catch (error) {
-      console.error('背景画像の設定に失敗しました:', error);
+  if (store.canvas) {
+    if (newImage) {
+      console.log("背景画像を設定します:", newImage);
+      try {
+        await setBackgroundImage(store.canvas as unknown as Canvas, newImage);
+        store.saveState();
+      } catch (error) {
+        console.error("背景画像の設定に失敗しました:", error);
+      }
+    } else {
+      if (store.canvas) {
+        store.canvas.backgroundImage = undefined;
+        store.canvas.renderAll.bind(store.canvas);
+        store.saveState();
+      }
     }
   }
 }, { immediate: true });
@@ -204,18 +320,15 @@ defineExpose({
   bringToFront,
   sendToBack,
   undo,
-  redo
+  redo,
 });
 </script>
 
 <style scoped>
 .fabric-canvas-container {
   position: relative;
-  width: 100%;
   height: 100%;
-  min-height: 400px;
   background-color: #f5f5f5;
-  border: 1px solid #ddd;
   overflow: hidden;
 }
 
@@ -288,5 +401,86 @@ defineExpose({
   .icon {
     font-size: 16px;
   }
+}
+
+/* 貼り付けフォームのスタイル */
+.paste-form-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 200; /* ツールバーより前面に */
+}
+
+.paste-form-modal {
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.paste-form-modal h3 {
+  margin-top: 0;
+  color: #333;
+  font-size: 1.2em;
+}
+
+.paste-form-modal textarea {
+  width: calc(100% - 20px); /* paddingを考慮 */
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 1em;
+  resize: vertical;
+}
+
+#paste-form {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 90%;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.btn-primary,
+.btn-secondary {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 1em;
+  transition: background-color 0.2s;
+}
+
+.btn-primary {
+  background-color: #007bff;
+  color: white;
+}
+
+.btn-primary:hover {
+  background-color: #0056b3;
+}
+
+.btn-secondary {
+  background-color: #6c757d;
+  color: white;
+}
+
+.btn-secondary:hover {
+  background-color: #5a6268;
 }
 </style>

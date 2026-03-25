@@ -1,4 +1,4 @@
-import { ref } from 'vue';
+import { ref } from "vue";
 
 /**
  * ファイル操作のためのコンポーザブル
@@ -21,10 +21,10 @@ export function useFileHandling() {
       errorMessage.value = null;
 
       // ファイルが画像かどうかチェック
-      if (!file.type.match('image.*')) {
-        errorMessage.value = '画像ファイルを選択してください';
+      if (!file.type.match("image.*")) {
+        errorMessage.value = "画像ファイルを選択してください";
         isLoading.value = false;
-        reject(new Error('画像ファイルではありません'));
+        reject(new Error("画像ファイルではありません"));
         return;
       }
 
@@ -33,20 +33,42 @@ export function useFileHandling() {
 
       // 読み込み完了時の処理
       reader.onload = (e) => {
-        isLoading.value = false;
         if (e.target?.result) {
-          resolve(e.target.result as string);
+          const dataUrl = e.target.result as string;
+          const orgimg = new Image();
+          orgimg.onload = () => {
+            // mobile safari の制限のため 4096 * 4096 を超える画像は縮小する
+            if (orgimg.width * orgimg.height > 4096 * 4096) {
+              const r = Math.sqrt((4096 * 4096) / (orgimg.width * orgimg.height));
+              const newimg = document.createElement("canvas");
+              newimg.width = orgimg.width * r;
+              newimg.height = orgimg.height * r;
+              const ctx = newimg.getContext("2d");
+              ctx?.drawImage(orgimg, 0, 0, newimg.width, newimg.height);
+              resolve(newimg.toDataURL(file.type));
+            } else {
+              resolve(dataUrl);
+            }
+            isLoading.value = false;
+          };
+          orgimg.onerror = () => {
+            isLoading.value = false;
+            errorMessage.value = "画像データの解析に失敗しました";
+            reject(new Error("画像データの解析に失敗しました"));
+          };
+          orgimg.src = dataUrl;
         } else {
-          errorMessage.value = 'ファイルの読み込みに失敗しました';
-          reject(new Error('ファイルの読み込みに失敗しました'));
+          isLoading.value = false;
+          errorMessage.value = "ファイルの読み込みに失敗しました";
+          reject(new Error("ファイルの読み込みに失敗しました"));
         }
       };
 
       // エラー時の処理
       reader.onerror = () => {
         isLoading.value = false;
-        errorMessage.value = 'ファイルの読み込み中にエラーが発生しました';
-        reject(new Error('ファイルの読み込み中にエラーが発生しました'));
+        errorMessage.value = "ファイルの読み込み中にエラーが発生しました";
+        reject(new Error("ファイルの読み込み中にエラーが発生しました"));
       };
 
       // ファイルをデータURLとして読み込み
@@ -60,9 +82,9 @@ export function useFileHandling() {
    * @param filename ファイル名
    * @param format ファイル形式
    */
-  const downloadImage = (dataUrl: string, filename: string, format: 'png' | 'jpeg' = 'png') => {
+  const downloadImage = (dataUrl: string, filename: string, format: "png" | "jpg" = "png") => {
     // ダウンロード用のリンク要素を作成
-    const link = document.createElement('a');
+    const link = document.createElement("a");
     link.href = dataUrl;
     link.download = `${filename}.${format}`;
 
@@ -81,10 +103,10 @@ export function useFileHandling() {
    * @param format ファイル形式
    * @returns Promise<boolean> 共有成功時はtrue
    */
-  const shareImage = async (dataUrl: string, title: string, format: 'png' | 'jpeg' = 'png'): Promise<boolean> => {
+  const shareImage = async (dataUrl: string, title: string, format: "png" | "jpg" = "png"): Promise<boolean> => {
     // Web Share APIが利用可能かチェック
     if (!navigator.share || !navigator.canShare) {
-      errorMessage.value = '共有機能はこのブラウザでサポートされていません';
+      errorMessage.value = "共有機能はこのブラウザでサポートされていません";
       return false;
     }
 
@@ -99,12 +121,12 @@ export function useFileHandling() {
       // 共有データを作成
       const shareData = {
         title: title,
-        files: [file]
+        files: [file],
       };
 
       // 共有可能かチェック
       if (!navigator.canShare(shareData)) {
-        errorMessage.value = 'この内容は共有できません';
+        errorMessage.value = "この内容は共有できません";
         return false;
       }
 
@@ -113,13 +135,13 @@ export function useFileHandling() {
       return true;
     } catch (error) {
       // ユーザーがキャンセルした場合はエラーとしない
-      if (error instanceof Error && error.name === 'AbortError') {
+      if (error instanceof Error && error.name === "AbortError") {
         return false;
       }
-      
+
       // その他のエラー
-      errorMessage.value = '共有中にエラーが発生しました';
-      console.error('共有エラー:', error);
+      errorMessage.value = "共有中にエラーが発生しました";
+      console.error("共有エラー:", error);
       return false;
     }
   };
@@ -131,10 +153,10 @@ export function useFileHandling() {
   const captureFromCamera = (): Promise<string | null> => {
     return new Promise((resolve, reject) => {
       // 入力要素を作成
-      const input = document.createElement('input');
-      input.type = 'file';
-      input.accept = 'image/*';
-      input.capture = 'environment'; // 背面カメラを使用
+      const input = document.createElement("input");
+      input.type = "file";
+      input.accept = "image/*";
+      input.capture = "environment"; // 背面カメラを使用
 
       // 変更イベントのハンドラ
       input.onchange = async (e) => {
@@ -164,6 +186,6 @@ export function useFileHandling() {
     loadImageFile,
     downloadImage,
     shareImage,
-    captureFromCamera
+    captureFromCamera,
   };
 }
