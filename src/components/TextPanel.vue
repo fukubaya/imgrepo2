@@ -639,10 +639,6 @@ const updateStyle = () => {
   if (!selectedText.value) return;
 
   const rgba = hexToRgb(textColor.value);
-  const rScale = roundToPointOne(
-    selectedText.value.scaleX || selectedText.value.scaleY || 1,
-  );
-  scale.value = rScale;
   updateTextStyle(selectedText.value, {
     fontFamily: fontFamily.value,
     fontSize: fontSize.value,
@@ -657,6 +653,7 @@ const updateStyle = () => {
     scaleY: scale.value,
     lineHeight: lineHeight.value,
   });
+  selectedText.value.setCoords();
 
   // 履歴に保存
   store.saveState();
