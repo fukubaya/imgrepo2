@@ -43,9 +43,13 @@
         </div>
       </div>
 
-      <div class="sidebar" :class="{ 'has-selection': isTextSelected }">
+      <div
+        class="sidebar"
+        :class="{ 'has-selection': isTextSelected || isRectSelected }"
+      >
         <div class="sidebar-section">
-          <TextPanel ref="textPanelRef" />
+          <TextPanel ref="textPanelRef" v-if="isTextSelected" />
+          <RectPanel v-if="isRectSelected" />
         </div>
       </div>
     </main>
@@ -67,6 +71,7 @@ import { computed, onMounted, provide, ref } from "vue";
 import FabricCanvas from "./components/FabricCanvas.vue";
 import ImageUploader from "./components/ImageUploader.vue";
 import InstallPrompt from "./components/InstallPrompt.vue";
+import RectPanel from "./components/RectPanel.vue";
 import TextPanel from "./components/TextPanel.vue";
 import { useFabricCanvas } from "./composables/useFabricCanvas";
 import { useFileHandling } from "./composables/useFileHandling";
@@ -92,6 +97,7 @@ provide("textPanel", textPanelRef);
 // 計算プロパティ
 const hasBackgroundImage = computed(() => store.hasBackgroundImage);
 const isTextSelected = computed(() => store.isTextSelected);
+const isRectSelected = computed(() => store.isRectSelected);
 
 // モバイル判定
 const isMobile = ref(false);

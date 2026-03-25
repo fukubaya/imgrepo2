@@ -36,6 +36,11 @@ export const useEditorStore = defineStore("editor", {
       return state.selectedObject && state.selectedObject.type === "textbox";
     },
 
+    // 選択中のオブジェクトが矩形か
+    isRectSelected: (state) => {
+      return state.selectedObject && state.selectedObject.type === "rect";
+    },
+
     // 元に戻せるか
     canUndo: (state) => state.undoStack.length > 0,
 
