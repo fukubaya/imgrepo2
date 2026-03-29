@@ -18,6 +18,8 @@ export function useFabricText() {
     // テキストオブジェクトの作成
     return markRaw(
       new Textbox(text, {
+        originX: "left",
+        originY: "top",
         fontFamily: DEFAULT_FONT,
         fontSize: 30,
         fill: "rgb(0 0 0 / 100%)",
@@ -93,7 +95,7 @@ export function useFabricText() {
     }
 
     if (effect.fontStyle) {
-      effectOptions.fontStyle = effect.fontStyle;
+      effectOptions.fontStyle = effect.fontStyle as any;
     }
 
     if (effect.fill) {

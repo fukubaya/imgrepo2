@@ -53,6 +53,8 @@ export function useFabricCanvas() {
 
           // 画像を配置
           fabricImage.set({
+            originX: "left",
+            originY: "top",
             left: 0,
             top: 0,
             selectable: false,

@@ -14,6 +14,8 @@ export function useFabricRect() {
     // 矩形オブジェクトの作成
     return markRaw(
       new Rect({
+        originX: "left",
+        originY: "top",
         left: 100,
         top: 100,
         fill: "#ffffff",

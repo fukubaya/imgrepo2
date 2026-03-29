@@ -148,7 +148,7 @@
           <div class="buttons">
             <button
               :class="{ active: textAlign === 'left' }"
-              @click="setTextAlign('left')"
+              @click="setTextAlign('left' as any)"
               title="左揃え"
               class="style-btn"
             >
@@ -156,7 +156,7 @@
             </button>
             <button
               :class="{ active: textAlign === 'center' }"
-              @click="setTextAlign('center')"
+              @click="setTextAlign('center' as any)"
               title="中央揃え"
               class="style-btn"
             >
@@ -164,7 +164,7 @@
             </button>
             <button
               :class="{ active: textAlign === 'right' }"
-              @click="setTextAlign('right')"
+              @click="setTextAlign('right' as any)"
               title="右揃え"
               class="style-btn"
             >
@@ -648,7 +648,7 @@ const updateStyle = () => {
     fontWeight: isBold.value ? "bold" : "normal",
     fontStyle: isItalic.value ? "italic" : "normal",
     underline: isUnderline.value,
-    textAlign: textAlign.value,
+    textAlign: textAlign.value as any,
     scaleX: scale.value,
     scaleY: scale.value,
     lineHeight: lineHeight.value,
@@ -790,7 +790,7 @@ const toggleUnderline = () => {
 };
 
 // テキスト配置の設定
-const setTextAlign = (align: string) => {
+const setTextAlign = (align: any) => {
   textAlign.value = align;
   updateStyle();
 };
