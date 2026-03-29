@@ -61,7 +61,7 @@ export const useEditorStore = defineStore("editor", {
     },
 
     // 選択オブジェクトの設定
-    setSelectedObject(object: Textbox | null) {
+    setSelectedObject(object: any | null) {
       this.selectedObject = object;
     },
 
@@ -74,7 +74,7 @@ export const useEditorStore = defineStore("editor", {
     deleteSelectedObject() {
       if (!this.canvas || !this.selectedObject) return;
 
-      this.canvas.remove(this.selectedObject as Textbox);
+      this.canvas.remove(this.selectedObject);
       this.setSelectedObject(null);
       this.canvas.requestRenderAll();
 
@@ -111,7 +111,7 @@ export const useEditorStore = defineStore("editor", {
     bringForward() {
       if (!this.canvas || !this.selectedObject) return;
 
-      this.canvas.bringObjectForward(this.selectedObject as Textbox);
+      this.canvas.bringObjectForward(this.selectedObject);
       this.canvas.requestRenderAll();
 
       // 履歴に保存
@@ -122,7 +122,7 @@ export const useEditorStore = defineStore("editor", {
     sendBackward() {
       if (!this.canvas || !this.selectedObject) return;
 
-      this.canvas.sendObjectBackwards(this.selectedObject as Textbox);
+      this.canvas.sendObjectBackwards(this.selectedObject);
       this.canvas.requestRenderAll();
 
       // 履歴に保存
@@ -133,7 +133,7 @@ export const useEditorStore = defineStore("editor", {
     bringToFront() {
       if (!this.canvas || !this.selectedObject) return;
 
-      this.canvas.bringObjectToFront(this.selectedObject as Textbox);
+      this.canvas.bringObjectToFront(this.selectedObject);
       this.canvas.requestRenderAll();
 
       // 履歴に保存
@@ -144,7 +144,7 @@ export const useEditorStore = defineStore("editor", {
     sendToBack() {
       if (!this.canvas || !this.selectedObject) return;
 
-      this.canvas.sendObjectToBack(this.selectedObject as Textbox);
+      this.canvas.sendObjectToBack(this.selectedObject);
       this.canvas.requestRenderAll();
 
       // 履歴に保存
