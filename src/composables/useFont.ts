@@ -34,6 +34,11 @@ export function useFont() {
         console.log("Typekit load error:", e);
       }
     };
+    tk.onerror = () => {
+      clearTimeout(t);
+      console.log("Typekit script load error");
+      h.className = h.className.replace(/\bwf-loading\b/g, "") + " wf-inactive";
+    };
     s.parentNode?.insertBefore(tk, s);
   };
 

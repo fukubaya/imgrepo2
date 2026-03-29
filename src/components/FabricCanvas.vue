@@ -364,7 +364,7 @@ watch(() => store.backgroundImage, async (newImage) => {
     } else {
       if (store.canvas) {
         store.canvas.backgroundImage = undefined;
-        store.canvas.renderAll.bind(store.canvas);
+        store.canvas.requestRenderAll();
         store.saveState();
       }
     }
