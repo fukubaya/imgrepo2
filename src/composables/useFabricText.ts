@@ -93,7 +93,7 @@ export function useFabricText() {
     }
 
     if (effect.fontStyle) {
-      effectOptions.fontStyle = effect.fontStyle;
+      effectOptions.fontStyle = effect.fontStyle as any;
     }
 
     if (effect.fill) {
