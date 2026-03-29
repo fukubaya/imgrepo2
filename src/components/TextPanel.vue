@@ -15,7 +15,7 @@
           <select
             id="text-font"
             v-model="fontFamily"
-            @change="updateStyle"
+            @change="debouncedUpdateStyle"
             class="style-select"
           >
             <option
@@ -49,7 +49,7 @@
                 min="0.1"
                 max="50"
                 step="0.1"
-                @input="updateStyle"
+                @input="debouncedUpdateStyle"
                 class="effect-slider"
               />
               <button
@@ -87,7 +87,7 @@
                 min="0.5"
                 max="3"
                 step="0.1"
-                @input="updateStyle"
+                @input="debouncedUpdateStyle"
                 class="effect-slider"
               />
               <button
@@ -112,7 +112,7 @@
               type="color"
               id="text-color"
               v-model="textColor"
-              @input="updateStyle"
+              @input="debouncedUpdateStyle"
               class="style-color-picker"
             />
           </div>
@@ -196,7 +196,7 @@
                 min="0"
                 max="1"
                 step="0.01"
-                @input="updateStyle"
+                @input="debouncedUpdateStyle"
                 class="effect-slider"
               />
               <button
@@ -250,7 +250,7 @@
                 type="color"
                 id="shadow-color"
                 v-model="shadowColor"
-                @input="updateShadow"
+                @input="debouncedUpdateShadow"
                 class="effect-color-picker"
                 v-if="hasShadow"
               />
@@ -273,7 +273,7 @@
                   v-model.number="shadowBlur"
                   min="0"
                   max="50"
-                  @input="updateShadow"
+                  @input="debouncedUpdateShadow"
                   class="effect-slider"
                 />
                 <button
@@ -310,7 +310,7 @@
                   v-model.number="shadowOffsetX"
                   min="-50"
                   max="50"
-                  @input="updateShadow"
+                  @input="debouncedUpdateShadow"
                   class="effect-slider"
                 />
                 <button
@@ -347,7 +347,7 @@
                   v-model.number="shadowOffsetY"
                   min="-50"
                   max="50"
-                  @input="updateShadow"
+                  @input="debouncedUpdateShadow"
                   class="effect-slider"
                 />
                 <button
@@ -385,7 +385,7 @@
                 type="color"
                 id="outline-color"
                 v-model="outlineColor"
-                @input="updateOutline"
+                @input="debouncedUpdateOutline"
                 class="effect-color-picker"
                 v-if="hasOutline"
               />
@@ -408,7 +408,7 @@
                   v-model.number="outlineWidth"
                   min="1"
                   max="10"
-                  @input="updateOutline"
+                  @input="debouncedUpdateOutline"
                   class="effect-slider"
                 />
                 <button
@@ -446,7 +446,7 @@
                 type="color"
                 id="background-color"
                 v-model="backgroundColor"
-                @input="updateBackgroundColor"
+                @input="debouncedUpdateBackgroundColor"
                 class="effect-color-picker"
               />
             </div>
@@ -474,7 +474,7 @@
                   min="0"
                   max="1"
                   step="0.01"
-                  @input="updateBackgroundColor"
+                  @input="debouncedUpdateBackgroundColor"
                   class="effect-slider"
                 />
                 <button
@@ -657,6 +657,35 @@ const updateStyle = () => {
 
   // 履歴に保存
   store.saveState();
+};
+
+let updateTimer: number | undefined;
+const debouncedUpdateStyle = () => {
+  clearTimeout(updateTimer);
+  updateTimer = setTimeout(() => {
+    updateStyle();
+  }, 100);
+};
+
+const debouncedUpdateShadow = () => {
+  clearTimeout(updateTimer);
+  updateTimer = setTimeout(() => {
+    updateShadow();
+  }, 100);
+};
+
+const debouncedUpdateOutline = () => {
+  clearTimeout(updateTimer);
+  updateTimer = setTimeout(() => {
+    updateOutline();
+  }, 100);
+};
+
+const debouncedUpdateBackgroundColor = () => {
+  clearTimeout(updateTimer);
+  updateTimer = setTimeout(() => {
+    updateBackgroundColor();
+  }, 100);
 };
 
 // エフェクトのコピー

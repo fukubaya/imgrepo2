@@ -1,5 +1,9 @@
 import { ref } from "vue";
 
+// mobile safari の制限のため 4096 * 4096 を超える画像は縮小する
+// 少し小さめのサイズを上限とする
+const MAX_IMAGE_SIZE = 3600 * 3600;
+
 /**
  * ファイル操作のためのコンポーザブル
  */
@@ -37,9 +41,9 @@ export function useFileHandling() {
           const dataUrl = e.target.result as string;
           const orgimg = new Image();
           orgimg.onload = () => {
-            // mobile safari の制限のため 4096 * 4096 を超える画像は縮小する
-            if (orgimg.width * orgimg.height > 4096 * 4096) {
-              const r = Math.sqrt((4096 * 4096) / (orgimg.width * orgimg.height));
+            // 最大サイズを超える場合は縮小してからデータURLを生成
+            if (orgimg.width * orgimg.height > MAX_IMAGE_SIZE) {
+              const r = Math.sqrt(MAX_IMAGE_SIZE / (orgimg.width * orgimg.height));
               const newimg = document.createElement("canvas");
               newimg.width = orgimg.width * r;
               newimg.height = orgimg.height * r;
