@@ -7,7 +7,7 @@ import { Canvas, Textbox } from "fabric";
 
 // エディタストア
 export const useEditorStore = defineStore("editor", {
-  state: (): EditorState & HistoryState => ({
+  state: (): EditorState & HistoryState & { saveStateTimer: ReturnType<typeof setTimeout> | null } => ({
     // キャンバス
     canvas: null,
     // 背景画像
@@ -19,6 +19,8 @@ export const useEditorStore = defineStore("editor", {
     // 履歴
     undoStack: [],
     redoStack: [],
+    // 履歴保存のデバウンス用タイマー
+    saveStateTimer: null,
   }),
 
   getters: {
@@ -52,6 +54,8 @@ export const useEditorStore = defineStore("editor", {
     // キャンバスの設定
     setCanvas(canvas: Canvas) {
       this.canvas = canvas;
+      // 履歴保存のデバウンス用タイマー
+      this.saveStateTimer = null;
     },
 
     // 背景画像の設定
@@ -152,22 +156,54 @@ export const useEditorStore = defineStore("editor", {
     },
 
     // 状態の保存（履歴用）
-    saveState() {
+    saveState(debounced: boolean = true) {
       if (!this.canvas) return;
 
-      // キャンバスの状態をJSON文字列として保存
-      const json = JSON.stringify(this.canvas.toJSON());
-
-      // 履歴スタックに追加
-      this.undoStack.push(json);
-
-      // スタックが大きくなりすぎないように制限
-      if (this.undoStack.length > 20) {
-        this.undoStack.shift();
+      // すでにタイマーがある場合はクリア
+      if (this.saveStateTimer) {
+        clearTimeout(this.saveStateTimer);
+        this.saveStateTimer = null;
       }
 
-      // 新しい操作を行った場合、やり直しスタックをクリア
-      this.redoStack = [];
+      if (debounced) {
+        // 500msのデバウンス
+        this.saveStateTimer = setTimeout(() => {
+          this.performSaveState();
+        }, 500);
+      } else {
+        // 即時保存
+        this.performSaveState();
+      }
+    },
+
+    // 実際の保存処理
+    performSaveState() {
+      if (!this.canvas) return;
+
+      try {
+        // 背景画像を一時的に保持し、JSONから除外して保存
+        const bg = this.canvas.backgroundImage;
+        this.canvas.backgroundImage = undefined;
+
+        // キャンバスの状態を保存（オブジェクトの参照ではなくJSON形式で保存）
+        const json = JSON.stringify(this.canvas.toJSON());
+
+        // 背景画像を復元
+        this.canvas.backgroundImage = bg;
+
+        // 履歴スタックに追加
+        this.undoStack.push(json);
+
+        // スタックが大きくなりすぎないように制限
+        if (this.undoStack.length > 5) {
+          this.undoStack.shift();
+        }
+
+        // 新しい操作を行った場合、やり直しスタックをクリア
+        this.redoStack = [];
+      } catch (error) {
+        console.error("Failed to save state:", error);
+      }
     },
 
     // 元に戻す
@@ -175,8 +211,15 @@ export const useEditorStore = defineStore("editor", {
       if (!this.canvas || this.undoStack.length === 0) return;
 
       // 現在の状態をやり直しスタックに保存
-      const currentState = JSON.stringify(this.canvas.toJSON());
-      this.redoStack.push(currentState);
+      try {
+        const bg = this.canvas.backgroundImage;
+        this.canvas.backgroundImage = undefined;
+        const currentState = JSON.stringify(this.canvas.toJSON());
+        this.canvas.backgroundImage = bg;
+        this.redoStack.push(currentState);
+      } catch (e) {
+        console.error("Failed to stringify current state for undo:", e);
+      }
 
       // 履歴から前の状態を取得
       const previousState = this.undoStack.pop();
@@ -190,8 +233,15 @@ export const useEditorStore = defineStore("editor", {
       if (!this.canvas || this.redoStack.length === 0) return;
 
       // 現在の状態を元に戻すスタックに保存
-      const currentState = JSON.stringify(this.canvas.toJSON());
-      this.undoStack.push(currentState);
+      try {
+        const bg = this.canvas.backgroundImage;
+        this.canvas.backgroundImage = undefined;
+        const currentState = JSON.stringify(this.canvas.toJSON());
+        this.canvas.backgroundImage = bg;
+        this.undoStack.push(currentState);
+      } catch (e) {
+        console.error("Failed to stringify current state for redo:", e);
+      }
 
       // やり直しスタックから状態を取得
       const nextState = this.redoStack.pop();
@@ -220,8 +270,8 @@ export const useEditorStore = defineStore("editor", {
     clearCanvas() {
       if (!this.canvas) return;
 
-      // 現在の状態を保存
-      this.saveState();
+      // 現在の状態を保存（即時保存）
+      this.saveState(false);
 
       // キャンバスをクリア
       this.canvas.clear();
