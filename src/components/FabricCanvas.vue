@@ -105,25 +105,6 @@
           <span class="icon">↓↓</span>
         </button>
       </div>
-
-      <div class="toolbar-group">
-        <button
-          @click="undo"
-          title="元に戻す"
-          :disabled="!canUndo"
-          class="toolbar-btn"
-        >
-          <span class="icon">↩</span>
-        </button>
-        <button
-          @click="redo"
-          title="やり直し"
-          :disabled="!canRedo"
-          class="toolbar-btn"
-        >
-          <span class="icon">↪</span>
-        </button>
-      </div>
     </div>
   </div>
 </template>
@@ -179,8 +160,6 @@ const textPanel = inject<any>("textPanel");
 
 // 計算プロパティ
 const hasSelection = computed(() => store.hasSelection);
-const canUndo = computed(() => store.canUndo);
-const canRedo = computed(() => store.canRedo);
 
 // キャンバスの初期化
 onMounted(() => {
@@ -201,19 +180,11 @@ onMounted(() => {
       canvas.on("selection:created", handleSelection);
       canvas.on("selection:updated", handleSelection);
       canvas.on("selection:cleared", () => store.setSelectedObject(null));
-      canvas.on("object:modified", () => {
-        store.saveState();
-        emit("object-modified");
-      });
-      canvas.on("text:changed", () => store.saveState());
 
       // 背景画像の設定（もし存在すれば）
       if (store.backgroundImage) {
         setBackgroundImage(canvas, store.backgroundImage);
       }
-
-      // 初期状態を保存
-      store.saveState();
 
       // キャンバス準備完了イベントを発火
       emit("canvas-ready", canvas);
@@ -274,10 +245,9 @@ const addRect = () => {
   store.canvas.add(rect);
   store.canvas.setActiveObject(rect);
   store.canvas.requestRenderAll();
-  store.saveState();
 };
 
-// 新しいテキストの追加
+// 新しいテキスト的追加
 const addText = (t: string = "") => {
   if (!store.canvas) return;
 
@@ -315,9 +285,6 @@ const addText = (t: string = "") => {
   store.canvas.add(text);
   store.canvas.setActiveObject(text);
   store.canvas.requestRenderAll();
-
-  // 履歴に保存
-  store.saveState();
 };
 
 // 選択オブジェクトの削除
@@ -340,16 +307,6 @@ const sendToBack = () => {
   store.sendToBack();
 };
 
-// 元に戻す
-const undo = () => {
-  store.undo();
-};
-
-// やり直し
-const redo = () => {
-  store.redo();
-};
-
 // 背景画像の変更を監視
 watch(() => store.backgroundImage, async (newImage) => {
   if (store.canvas) {
@@ -357,7 +314,6 @@ watch(() => store.backgroundImage, async (newImage) => {
       console.log("背景画像を設定します:", newImage);
       try {
         await setBackgroundImage(store.canvas as unknown as Canvas, newImage);
-        store.saveState();
       } catch (error) {
         console.error("背景画像の設定に失敗しました:", error);
       }
@@ -365,7 +321,6 @@ watch(() => store.backgroundImage, async (newImage) => {
       if (store.canvas) {
         store.canvas.backgroundImage = undefined;
         store.canvas.requestRenderAll();
-        store.saveState();
       }
     }
   }
@@ -378,8 +333,6 @@ defineExpose({
   duplicateSelected,
   bringToFront,
   sendToBack,
-  undo,
-  redo,
   textPanel,
 });
 </script>
