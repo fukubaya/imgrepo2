@@ -654,7 +654,6 @@ const updateStyle = () => {
     lineHeight: lineHeight.value,
   });
   selectedText.value.setCoords();
-
 };
 
 let updateTimer: number | undefined;
@@ -874,7 +873,6 @@ const updateShadow = () => {
       shadow: null,
     });
   }
-
 };
 
 // アウトラインの更新
@@ -892,7 +890,6 @@ const updateOutline = () => {
       strokeWidth: 0,
     });
   }
-
 };
 
 // 背景色の更新
@@ -912,9 +909,6 @@ const updateBackgroundColor = () => {
       textBackgroundColor: null,
     });
   }
-
-  // 履歴に保存
-  store.saveState();
 };
 
 // エフェクトプリセットの適用

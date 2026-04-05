@@ -7,7 +7,7 @@ import { Canvas, Textbox } from "fabric";
 
 // エディタストア
 export const useEditorStore = defineStore("editor", {
-  state: (): EditorState & { saveStateTimer: ReturnType<typeof setTimeout> | null } => ({
+  state: (): EditorState => ({
     // キャンバス
     canvas: null,
     // 背景画像
@@ -16,8 +16,6 @@ export const useEditorStore = defineStore("editor", {
     selectedObject: null,
     // 編集中フラグ
     isEditing: false,
-    // 履歴保存のデバウンス用タイマー
-    saveStateTimer: null,
   }),
 
   getters: {
@@ -45,8 +43,6 @@ export const useEditorStore = defineStore("editor", {
     // キャンバスの設定
     setCanvas(canvas: Canvas) {
       this.canvas = canvas;
-      // 履歴保存のデバウンス用タイマー
-      this.saveStateTimer = null;
     },
 
     // 背景画像の設定
