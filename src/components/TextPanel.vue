@@ -610,6 +610,11 @@ onMounted(() => {
       availableFonts.value = AVAILABLE_FONTS.filter((font) => {
         return isAvailableFont(document, font);
       });
+      // 読み込み完了後にキャンバスを再描画
+      store.selectedObject?.canvas?.requestRenderAll();
+    },
+    inactive: () => {
+      console.warn("Fonts failed to load");
     },
   });
 });
@@ -618,7 +623,7 @@ onMounted(() => {
 watch(selectedText, (text) => {
   if (text) {
     const rgba = extractRGBA(text.fill as string || "rgb(0 0 0 / 100%)");
-    fontFamily.value = text.fontFamily || DEFAULT_FONT;
+    fontFamily.value = text.fontFamily && isAvailableFont(document, { value: text.fontFamily, label: text.fontFamily }) ? text.fontFamily : DEFAULT_FONT;
     fontSize.value = text.fontSize || 30;
     textColor.value = rgbToHex(rgba);
     textColorOpacity.value = rgba.a ? rgba.a / 100.0 : 1;
