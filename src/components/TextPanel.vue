@@ -655,8 +655,6 @@ const updateStyle = () => {
   });
   selectedText.value.setCoords();
 
-  // 履歴に保存
-  store.saveState();
 };
 
 let updateTimer: number | undefined;
@@ -692,7 +690,6 @@ const debouncedUpdateBackgroundColor = () => {
 const copyEffects = () => {
   if (!selectedText.value) return;
   copyTextStylesAndEffects(selectedText.value);
-  store.saveState();
 };
 
 // エフェクトのペースト
@@ -763,7 +760,6 @@ const pasteEffects = () => {
     scale.value = rScale;
     lineHeight.value = text.lineHeight || 1.2;
   }
-  store.saveState();
 };
 
 defineExpose({
@@ -879,8 +875,6 @@ const updateShadow = () => {
     });
   }
 
-  // 履歴に保存
-  store.saveState();
 };
 
 // アウトラインの更新
@@ -899,8 +893,6 @@ const updateOutline = () => {
     });
   }
 
-  // 履歴に保存
-  store.saveState();
 };
 
 // 背景色の更新
@@ -970,9 +962,6 @@ const applyPreset = (presetName: string) => {
 
     // プリセット設定を反映
     applyTextEffect(selectedText.value, preset);
-
-    // 履歴に保存
-    store.saveState();
   }
 };
 </script>

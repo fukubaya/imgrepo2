@@ -276,8 +276,6 @@ const updateRect = () => {
       ? strokeDashArray.value
       : undefined,
   });
-
-  store.saveState();
 };
 </script>
 

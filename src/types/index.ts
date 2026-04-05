@@ -33,12 +33,6 @@ export interface TextEffectPreset {
   textBackgroundColor?: string | null;
 }
 
-// 履歴管理
-export interface HistoryState {
-  undoStack: string[];
-  redoStack: string[];
-}
-
 // 色
 export interface Color {
   r: number;
