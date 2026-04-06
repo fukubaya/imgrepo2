@@ -542,6 +542,7 @@
 
 <script setup lang="ts">
 import { Shadow, Textbox } from "fabric";
+import FontFaceObserver from "fontfaceobserver";
 import { computed, onMounted, ref, watch } from "vue";
 import { useFabricText } from "../composables/useFabricText";
 import { useFont } from "../composables/useFont";
@@ -649,22 +650,34 @@ watch(selectedText, (text) => {
 const updateStyle = () => {
   if (!selectedText.value) return;
 
-  const rgba = hexToRgb(textColor.value);
-  updateTextStyle(selectedText.value, {
-    fontFamily: fontFamily.value,
-    fontSize: fontSize.value,
-    fill: `rgb(${rgba.r} ${rgba.g} ${rgba.b} / ${
-      textColorOpacity.value * 100
-    }%)`,
-    fontWeight: isBold.value ? "bold" : "normal",
-    fontStyle: isItalic.value ? "italic" : "normal",
-    underline: isUnderline.value,
-    textAlign: textAlign.value as any,
-    scaleX: scale.value,
-    scaleY: scale.value,
-    lineHeight: lineHeight.value,
+  const font = fontFamily.value;
+  const observer = new FontFaceObserver(font);
+
+  const applyFont = () => {
+    if (!selectedText.value) return;
+    const rgba = hexToRgb(textColor.value);
+    updateTextStyle(selectedText.value, {
+      fontFamily: font,
+      fontSize: fontSize.value,
+      fill: `rgb(${rgba.r} ${rgba.g} ${rgba.b} / ${
+        textColorOpacity.value * 100
+      }%)`,
+      fontWeight: isBold.value ? "bold" : "normal",
+      fontStyle: isItalic.value ? "italic" : "normal",
+      underline: isUnderline.value,
+      textAlign: textAlign.value as any,
+      scaleX: scale.value,
+      scaleY: scale.value,
+      lineHeight: lineHeight.value,
+    });
+    selectedText.value.setCoords();
+    selectedText.value.canvas?.requestRenderAll();
+  };
+
+  observer.load().then(applyFont).catch((e: Error) => {
+    console.error("Font load failed:", font, e);
+    applyFont();
   });
-  selectedText.value.setCoords();
 };
 
 let updateTimer: number | undefined;
