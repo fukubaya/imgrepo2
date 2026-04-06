@@ -198,6 +198,14 @@ onMounted(() => {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const handleSelection = (e: any) => {
   const selected = e.selected?.[0] || e.target;
+
+  // オブジェクトが自分自身を再帰的に選択していないか確認
+  if (store.selectedObject === selected) {
+    console.log("Skipping redundant selection");
+    return;
+  }
+
+  console.log("handleSelection:", selected);
   store.setSelectedObject(selected);
   emit("object-selected", selected);
 };

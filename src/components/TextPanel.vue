@@ -622,6 +622,7 @@ onMounted(() => {
 
 // 選択テキストが変わったらスタイル設定を更新
 watch(selectedText, (text) => {
+  console.log("watch(selectedText):", text);
   if (text) {
     const rgba = extractRGBA(text.fill as string || "rgb(0 0 0 / 100%)");
     fontFamily.value = text.fontFamily
@@ -833,6 +834,7 @@ const backgroundColorOpacity = ref(1);
 
 // 選択テキストが変わったら効果設定を更新
 watch(selectedText, (text) => {
+  console.log("watch(selectedText) effects:", text);
   if (text) {
     // 影
     const shadow = text.shadow;

@@ -53,6 +53,7 @@ export const useEditorStore = defineStore("editor", {
 
     // 選択オブジェクトの設定
     setSelectedObject(object: any | null) {
+      console.log("setSelectedObject:", object);
       this.selectedObject = object;
     },
 
