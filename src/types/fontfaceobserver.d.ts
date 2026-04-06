@@ -1,1 +1,1 @@
-declare module 'fontfaceobserver';
+declare module "fontfaceobserver";
