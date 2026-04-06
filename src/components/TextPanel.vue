@@ -624,6 +624,11 @@ onMounted(() => {
 watch(selectedText, (text) => {
   console.log("watch(selectedText):", text);
   if (text) {
+    // 選択オブジェクトが消去されたタイミングで呼び出される場合があるためガード
+    if (!text.canvas) {
+      console.warn("Selected text has no canvas, skipping style update");
+      return;
+    }
     const rgba = extractRGBA(text.fill as string || "rgb(0 0 0 / 100%)");
     fontFamily.value = text.fontFamily
         && isAvailableFont(document, {
@@ -648,38 +653,42 @@ watch(selectedText, (text) => {
 }, { immediate: true });
 
 // スタイルの更新
-const updateStyle = () => {
-  if (!selectedText.value) return;
-
-  const font = fontFamily.value;
-  const observer = new FontFaceObserver(font);
-
-  const applyFont = () => {
+  const updateStyle = () => {
     if (!selectedText.value) return;
-    const rgba = hexToRgb(textColor.value);
-    updateTextStyle(selectedText.value, {
-      fontFamily: font,
-      fontSize: fontSize.value,
-      fill: `rgb(${rgba.r} ${rgba.g} ${rgba.b} / ${
-        textColorOpacity.value * 100
-      }%)`,
-      fontWeight: isBold.value ? "bold" : "normal",
-      fontStyle: isItalic.value ? "italic" : "normal",
-      underline: isUnderline.value,
-      textAlign: textAlign.value as any,
-      scaleX: scale.value,
-      scaleY: scale.value,
-      lineHeight: lineHeight.value,
-    });
-    selectedText.value.setCoords();
-    selectedText.value.canvas?.requestRenderAll();
-  };
 
-  observer.load().then(applyFont).catch((e: Error) => {
-    console.error("Font load failed:", font, e);
-    applyFont();
-  });
-};
+    const font = fontFamily.value;
+    const observer = new FontFaceObserver(font);
+
+    const applyFont = () => {
+      if (!selectedText.value) return;
+      const rgba = hexToRgb(textColor.value);
+      try {
+        updateTextStyle(selectedText.value, {
+          fontFamily: font,
+          fontSize: fontSize.value,
+          fill: `rgb(${rgba.r} ${rgba.g} ${rgba.b} / ${
+            textColorOpacity.value * 100
+          }%)`,
+          fontWeight: isBold.value ? "bold" : "normal",
+          fontStyle: isItalic.value ? "italic" : "normal",
+          underline: isUnderline.value,
+          textAlign: textAlign.value as any,
+          scaleX: scale.value,
+          scaleY: scale.value,
+          lineHeight: lineHeight.value,
+        });
+        selectedText.value.setCoords();
+        selectedText.value.canvas?.requestRenderAll();
+      } catch (e) {
+        console.error("Error updating text style:", e);
+      }
+    };
+
+    observer.load().then(applyFont).catch((e: Error) => {
+      console.error("Font load failed:", font, e);
+      applyFont();
+    });
+  };
 
 let updateTimer: number | undefined;
 const debouncedUpdateStyle = () => {
