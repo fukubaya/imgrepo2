@@ -43,11 +43,21 @@ export const isAvailableFont: (document: Document, font: FontOption) => boolean 
     }
   }
 
+  // ローカルストレージからキャッシュを取得
+  const cacheKey = `font-available-${font.value}`;
+  const cached = localStorage.getItem(cacheKey);
+  if (cached !== null) {
+    return cached === "true";
+  }
+
   // フォントを指定して描画してサイズを比較する
   const testString = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
   const canvas = document.createElement("canvas");
   const context = canvas.getContext("2d");
-  if (!context) return true; // コンテキストが取得できない場合はフォントが利用可能とみなす
+  if (!context) {
+    localStorage.setItem(cacheKey, "true");
+    return true;
+  }
 
   // ベースフォントでのサイズを取得
   for (const baseFont of baseFonts) {
@@ -59,10 +69,12 @@ export const isAvailableFont: (document: Document, font: FontOption) => boolean 
     // ベースフォントと比較してサイズが変わらない場合はフォントが利用不可
     if (newSize === baselineSize) {
       canvas.remove();
+      localStorage.setItem(cacheKey, "false");
       return false;
     }
   }
 
   canvas.remove();
+  localStorage.setItem(cacheKey, "true");
   return true;
 };
