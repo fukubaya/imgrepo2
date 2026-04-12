@@ -2,7 +2,7 @@ import { ref } from "vue";
 
 // mobile safari の制限のため 4096 * 4096 を超える画像は縮小する
 // 少し小さめのサイズを上限とする
-const MAX_IMAGE_SIZE = 3600 * 3600;
+const MAX_IMAGE_SIZE = 3200 * 3200;
 
 /**
  * ファイル操作のためのコンポーザブル
