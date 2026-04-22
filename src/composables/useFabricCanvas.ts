@@ -38,8 +38,6 @@ export function useFabricCanvas() {
    */
   const setBackgroundImage = (fCanvas: Canvas, imageUrl: string): Promise<void> => {
     return new Promise((resolve, reject) => {
-      console.log("setBackgroundImage called with:", imageUrl.substring(0, 50) + "...");
-
       // Fabric.jsのImage.fromURLを使用して画像を読み込む
       FabricImage.fromURL(imageUrl).then((fabricImage: FabricImage) => {
         if (!fabricImage) {
@@ -65,7 +63,6 @@ export function useFabricCanvas() {
           fCanvas.backgroundImage = fabricImage;
           fCanvas.setZoom(scale);
           fCanvas.requestRenderAll();
-          console.log("Background image set successfully");
           resolve();
         } catch (error) {
           console.error("Error setting background image:", error);

@@ -41,8 +41,6 @@ export function usePwa() {
       deferredPrompt.value = null;
       // インストール可能フラグをリセット
       canInstall.value = false;
-      // インストール完了をログに記録
-      console.log("PWA was installed");
     });
   });
 

@@ -201,11 +201,9 @@ const handleSelection = (e: any) => {
 
   // オブジェクトが自分自身を再帰的に選択していないか確認
   if (store.selectedObject === selected) {
-    console.log("Skipping redundant selection");
     return;
   }
 
-  console.log("handleSelection:", selected);
   store.setSelectedObject(selected);
   emit("object-selected", selected);
 };
@@ -319,7 +317,6 @@ const sendToBack = () => {
 watch(() => store.backgroundImage, async (newImage) => {
   if (store.canvas) {
     if (newImage) {
-      console.log("背景画像を設定します:", newImage);
       try {
         await setBackgroundImage(store.canvas as unknown as Canvas, newImage);
       } catch (error) {

@@ -118,19 +118,8 @@ onMounted(() => {
 
 // 画像読み込み時の処理
 const onImageLoaded = (dataUrl: string) => {
-  console.log("画像が読み込まれました:", dataUrl.substring(0, 50) + "...");
-
   // 明示的に背景画像を設定
   store.setBackgroundImage(dataUrl);
-
-  // 少し遅延を入れてUIの更新を確実にする
-  setTimeout(() => {
-    if (canvasRef.value) {
-      console.log("キャンバスが利用可能です");
-    } else {
-      console.log("キャンバスがまだ利用可能ではありません");
-    }
-  }, 100);
 };
 
 // オブジェクト選択時の処理
