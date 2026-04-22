@@ -47,13 +47,11 @@ export const useEditorStore = defineStore("editor", {
 
     // 背景画像の設定
     setBackgroundImage(dataUrl: string | null) {
-      console.log("setBackgroundImage called in store:", dataUrl ? dataUrl.substring(0, 50) + "..." : "null");
       this.backgroundImage = dataUrl;
     },
 
     // 選択オブジェクトの設定
     setSelectedObject(object: any | null) {
-      console.log("setSelectedObject:", object);
       this.selectedObject = object;
     },
 

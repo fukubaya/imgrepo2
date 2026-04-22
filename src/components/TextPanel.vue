@@ -106,6 +106,11 @@
         </div>
 
         <div class="style-buttons-section">
+          <div class="buttons">
+            <button @click="handleSplitText" class="style-btn" title="分割">
+              <span class="icon">✁</span>
+            </button>
+          </div>
           <!-- テキスト色 -->
           <div class="buttons">
             <input
@@ -566,6 +571,7 @@ const {
   applyTextEffect,
   copyTextStylesAndEffects,
   pasteTextStylesAndEffects,
+  splitTextAtCursor,
 } = useFabricText();
 
 // フォントリスト
@@ -622,7 +628,6 @@ onMounted(() => {
 
 // 選択テキストが変わったらスタイル設定を更新
 watch(selectedText, (text) => {
-  console.log("watch(selectedText):", text);
   if (text) {
     // 選択オブジェクトが消去されたタイミングで呼び出される場合があるためガード
     if (!text.canvas) {
@@ -653,42 +658,42 @@ watch(selectedText, (text) => {
 }, { immediate: true });
 
 // スタイルの更新
-  const updateStyle = () => {
+const updateStyle = () => {
+  if (!selectedText.value) return;
+
+  const font = fontFamily.value;
+  const observer = new FontFaceObserver(font);
+
+  const applyFont = () => {
     if (!selectedText.value) return;
-
-    const font = fontFamily.value;
-    const observer = new FontFaceObserver(font);
-
-    const applyFont = () => {
-      if (!selectedText.value) return;
-      const rgba = hexToRgb(textColor.value);
-      try {
-        updateTextStyle(selectedText.value, {
-          fontFamily: font,
-          fontSize: fontSize.value,
-          fill: `rgb(${rgba.r} ${rgba.g} ${rgba.b} / ${
-            textColorOpacity.value * 100
-          }%)`,
-          fontWeight: isBold.value ? "bold" : "normal",
-          fontStyle: isItalic.value ? "italic" : "normal",
-          underline: isUnderline.value,
-          textAlign: textAlign.value as any,
-          scaleX: scale.value,
-          scaleY: scale.value,
-          lineHeight: lineHeight.value,
-        });
-        selectedText.value.setCoords();
-        selectedText.value.canvas?.requestRenderAll();
-      } catch (e) {
-        console.error("Error updating text style:", e);
-      }
-    };
-
-    observer.load().then(applyFont).catch((e: Error) => {
-      console.error("Font load failed:", font, e);
-      applyFont();
-    });
+    const rgba = hexToRgb(textColor.value);
+    try {
+      updateTextStyle(selectedText.value, {
+        fontFamily: font,
+        fontSize: fontSize.value,
+        fill: `rgb(${rgba.r} ${rgba.g} ${rgba.b} / ${
+          textColorOpacity.value * 100
+        }%)`,
+        fontWeight: isBold.value ? "bold" : "normal",
+        fontStyle: isItalic.value ? "italic" : "normal",
+        underline: isUnderline.value,
+        textAlign: textAlign.value as any,
+        scaleX: scale.value,
+        scaleY: scale.value,
+        lineHeight: lineHeight.value,
+      });
+      selectedText.value.setCoords();
+      selectedText.value.canvas?.requestRenderAll();
+    } catch (e) {
+      console.error("Error updating text style:", e);
+    }
   };
+
+  observer.load().then(applyFont).catch((e: Error) => {
+    console.error("Font load failed:", font, e);
+    applyFont();
+  });
+};
 
 let updateTimer: number | undefined;
 const debouncedUpdateStyle = () => {
@@ -723,6 +728,16 @@ const debouncedUpdateBackgroundColor = () => {
 const copyEffects = () => {
   if (!selectedText.value) return;
   copyTextStylesAndEffects(selectedText.value);
+};
+
+// テキスト分割
+const handleSplitText = () => {
+  if (!selectedText.value) return;
+  splitTextAtCursor(selectedText.value, (newText) => {
+    store.canvas?.add(newText);
+    store.canvas?.setActiveObject(newText);
+    store.canvas?.requestRenderAll();
+  });
 };
 
 // エフェクトのペースト
@@ -843,7 +858,6 @@ const backgroundColorOpacity = ref(1);
 
 // 選択テキストが変わったら効果設定を更新
 watch(selectedText, (text) => {
-  console.log("watch(selectedText) effects:", text);
   if (text) {
     // 影
     const shadow = text.shadow;

@@ -45,6 +45,7 @@ export function useFabricText() {
   ) => {
     // スタイルを適用
     textObject.set(styleOptions);
+    textObject.setCoords();
 
     // キャンバスの再描画をリクエスト
     if (textObject.canvas) {
@@ -117,6 +118,7 @@ export function useFabricText() {
       left,
       top,
     });
+    textObject.setCoords();
 
     // キャンバスの再描画をリクエスト
     if (textObject.canvas) {
@@ -133,6 +135,7 @@ export function useFabricText() {
     textObject.set({
       angle,
     });
+    textObject.setCoords();
 
     // キャンバスの再描画をリクエスト
     if (textObject.canvas) {
@@ -149,6 +152,7 @@ export function useFabricText() {
     textObject.set({
       text: newText,
     });
+    textObject.setCoords();
 
     // キャンバスの再描画をリクエスト
     if (textObject.canvas) {
@@ -171,6 +175,38 @@ export function useFabricText() {
       });
 
       callback(cloned);
+    });
+  };
+
+  /**
+   * カーソル位置でテキストを分割する
+   * @param textObject テキストオブジェクト
+   * @param callback 複製後のオブジェクトを配置するためのコールバック
+   */
+  const splitTextAtCursor = (textObject: Textbox, callback: (newText: Textbox) => void) => {
+    const selectionStart = textObject.selectionStart || 0;
+    const selectionEnd = textObject.selectionEnd || 0;
+    const fullText = textObject.text || "";
+
+    const splitIndex = Math.max(selectionStart, selectionEnd);
+    if (splitIndex === 0 || splitIndex === fullText.length) {
+      return; // 分割できない
+    }
+
+    const firstPart = fullText.slice(0, splitIndex);
+    const secondPart = fullText.slice(splitIndex);
+
+    textObject.set({ text: firstPart });
+    textObject.canvas?.requestRenderAll();
+
+    textObject.clone().then((cloned: Textbox) => {
+      cloned.set({
+        text: secondPart,
+        left: textObject.left || 0,
+        top: textObject.top || 0,
+        editable: true,
+      });
+      callback(markRaw(cloned));
     });
   };
 
@@ -219,5 +255,6 @@ export function useFabricText() {
     duplicateText,
     copyTextStylesAndEffects,
     pasteTextStylesAndEffects,
+    splitTextAtCursor,
   };
 }
