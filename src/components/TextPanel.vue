@@ -630,7 +630,7 @@ onMounted(() => {
 watch(selectedText, (text) => {
   if (text) {
     // 選択オブジェクトが有効であることを確認
-    if (!text.canvas || text.isType === "activeSelection") {
+    if (!text.canvas || (typeof text.isType === "function" ? text.isType("activeSelection") : (text.isType as unknown) === "activeSelection")) {
       console.warn("Selected text invalid or no canvas, skipping style update");
       return;
     }
