@@ -8,9 +8,6 @@ importers:
 
   .:
     dependencies:
-      '@types/fabric':
-        specifier: ^5.3.11
-        version: 5.3.11
       '@types/node':
         specifier: ^22.15.29
         version: 22.15.29
@@ -18,8 +15,8 @@ importers:
         specifier: ^10.0.0
         version: 10.0.0
       fabric:
-        specifier: ^7.2.0
-        version: 7.2.0
+        specifier: ^7.3.1
+        version: 7.3.1
       fontfaceobserver:
         specifier: ^2.3.0
         version: 2.3.0
@@ -1062,9 +1059,6 @@ packages:
   '@types/estree@1.0.7':
     resolution: {integrity: sha512-w28IoSUCJpidD/TGviZwwMJckNESJZXFu7NBZ5YJ4mEUnNraUn9Pm8HSZm/jDF1pDWYKspWE7oVphigUPRakIQ==}
 
-  '@types/fabric@5.3.11':
-    resolution: {integrity: sha512-dvicyfS0rDW2KGnwXGz+t+ckMGZUtHzhp8XvaM99R1TsYVsIenf96PbEWCNMHknR6a3/lyYwh1APxxm+DqRkpw==}
-
   '@types/json-schema@7.0.15':
     resolution: {integrity: sha512-5+fP8P8MFNC+AyZCDxrB2pkZFPGzqQWUzpSeuuVLvm8VMcorNYavBqoFcxK8bQz4Qsbn4oUEEem4wDLfcysGHA==}
 
@@ -1570,8 +1564,8 @@ packages:
     resolution: {integrity: sha512-XYfuKMvj4O35f/pOXLObndIRvyQ+/+6AhODh+OKWj9S9498pHHn/IMszH+gt0fBCRWMNfk1ZSp5x3AifmnI2vg==}
     engines: {node: '>=6'}
 
-  fabric@7.2.0:
-    resolution: {integrity: sha512-XSYmSqSMrlbCg+/j7/uU/PFeZuA5hHRDp7sGbDlMvz/T6BHt2MQSOYtz/AIdr+kmReA1s5jTzHJ8AjHwYUcmfQ==}
+  fabric@7.3.1:
+    resolution: {integrity: sha512-RoLAQzUX+/3RNMYKliuN0P2HXdSDEGzyjS7FnmEbo3nhb8LFh59T+l3f6ApIu5LT4YB49YfMNrEajeIbutmD7Q==}
     engines: {node: '>=20.0.0'}
 
   fast-deep-equal@3.1.3:
@@ -3799,8 +3793,6 @@ snapshots:
 
   '@types/estree@1.0.7': {}
 
-  '@types/fabric@5.3.11': {}
-
   '@types/json-schema@7.0.15': {}
 
   '@types/node@22.15.29':
@@ -4488,7 +4480,7 @@ snapshots:
   expand-template@2.0.3:
     optional: true
 
-  fabric@7.2.0:
+  fabric@7.3.1:
     optionalDependencies:
       canvas: 3.2.2
       jsdom: 26.1.0(canvas@3.2.2)
