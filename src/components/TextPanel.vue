@@ -629,9 +629,9 @@ onMounted(() => {
 // 選択テキストが変わったらスタイル設定を更新
 watch(selectedText, (text) => {
   if (text) {
-    // 選択オブジェクトが消去されたタイミングで呼び出される場合があるためガード
-    if (!text.canvas) {
-      console.warn("Selected text has no canvas, skipping style update");
+    // 選択オブジェクトが有効であることを確認
+    if (!text.canvas || text.isType === "activeSelection") {
+      console.warn("Selected text invalid or no canvas, skipping style update");
       return;
     }
     const rgba = extractRGBA(text.fill as string || "rgb(0 0 0 / 100%)");
