@@ -106,6 +106,11 @@
         </div>
 
         <div class="style-buttons-section">
+          <div class="buttons">
+            <button @click="handleSplitText" class="style-btn" title="分割">
+              <span class="icon">✁</span>
+            </button>
+          </div>
           <!-- テキスト色 -->
           <div class="buttons">
             <input
@@ -566,6 +571,7 @@ const {
   applyTextEffect,
   copyTextStylesAndEffects,
   pasteTextStylesAndEffects,
+  splitTextAtCursor,
 } = useFabricText();
 
 // フォントリスト
@@ -723,6 +729,16 @@ const debouncedUpdateBackgroundColor = () => {
 const copyEffects = () => {
   if (!selectedText.value) return;
   copyTextStylesAndEffects(selectedText.value);
+};
+
+// テキスト分割
+const handleSplitText = () => {
+  if (!selectedText.value) return;
+  splitTextAtCursor(selectedText.value, (newText) => {
+    store.canvas?.add(newText);
+    store.canvas?.setActiveObject(newText);
+    store.canvas?.requestRenderAll();
+  });
 };
 
 // エフェクトのペースト
