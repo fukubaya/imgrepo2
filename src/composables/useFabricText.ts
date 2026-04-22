@@ -45,6 +45,7 @@ export function useFabricText() {
   ) => {
     // スタイルを適用
     textObject.set(styleOptions);
+    textObject.setCoords();
 
     // キャンバスの再描画をリクエスト
     if (textObject.canvas) {
@@ -117,6 +118,7 @@ export function useFabricText() {
       left,
       top,
     });
+    textObject.setCoords();
 
     // キャンバスの再描画をリクエスト
     if (textObject.canvas) {
@@ -133,6 +135,7 @@ export function useFabricText() {
     textObject.set({
       angle,
     });
+    textObject.setCoords();
 
     // キャンバスの再描画をリクエスト
     if (textObject.canvas) {
@@ -149,6 +152,7 @@ export function useFabricText() {
     textObject.set({
       text: newText,
     });
+    textObject.setCoords();
 
     // キャンバスの再描画をリクエスト
     if (textObject.canvas) {

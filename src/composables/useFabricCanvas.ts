@@ -64,7 +64,7 @@ export function useFabricCanvas() {
           // 背景として設定
           fCanvas.backgroundImage = fabricImage;
           fCanvas.setZoom(scale);
-          fCanvas.renderAll();
+          fCanvas.requestRenderAll();
           console.log("Background image set successfully");
           resolve();
         } catch (error) {
