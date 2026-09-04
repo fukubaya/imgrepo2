@@ -180,6 +180,10 @@ onMounted(() => {
       canvas.on("selection:created", handleSelection);
       canvas.on("selection:updated", handleSelection);
       canvas.on("selection:cleared", () => store.setSelectedObject(null));
+      canvas.on(
+        "object:modified",
+        (e: any) => emit("object-modified", e.target),
+      );
 
       // 背景画像の設定（もし存在すれば）
       if (store.backgroundImage) {

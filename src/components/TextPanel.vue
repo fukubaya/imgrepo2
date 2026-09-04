@@ -15,7 +15,7 @@
           <select
             id="text-font"
             v-model="fontFamily"
-            @change="debouncedUpdateStyle"
+            @change="debouncedUpdateFont"
             class="style-select"
           >
             <option
@@ -37,7 +37,7 @@
                 class="step-btn"
                 @click="
                   scale = Math.round((scale - 0.1) * 10) / 10;
-                  updateStyle();
+                  updateScale();
                 "
               >
                 -
@@ -49,14 +49,14 @@
                 min="0.1"
                 max="50"
                 step="0.1"
-                @input="debouncedUpdateStyle"
+                @input="debouncedUpdateScale"
                 class="effect-slider"
               />
               <button
                 class="step-btn"
                 @click="
                   scale = Math.round((scale + 0.1) * 10) / 10;
-                  updateStyle();
+                  updateScale();
                 "
               >
                 +
@@ -75,7 +75,7 @@
                 @click="
                   lineHeight = Math.round((lineHeight - 0.1) * 10)
                     / 10;
-                  updateStyle();
+                  updateLineHeight();
                 "
               >
                 -
@@ -87,7 +87,7 @@
                 min="0.5"
                 max="3"
                 step="0.1"
-                @input="debouncedUpdateStyle"
+                @input="debouncedUpdateLineHeight"
                 class="effect-slider"
               />
               <button
@@ -95,7 +95,7 @@
                 @click="
                   lineHeight = Math.round((lineHeight + 0.1) * 10)
                     / 10;
-                  updateStyle();
+                  updateLineHeight();
                 "
               >
                 +
@@ -117,7 +117,7 @@
               type="color"
               id="text-color"
               v-model="textColor"
-              @input="debouncedUpdateStyle"
+              @input="debouncedUpdateColor"
               class="style-color-picker"
             />
           </div>
@@ -189,7 +189,7 @@
                     0,
                     Math.round((textColorOpacity - 0.05) * 100) / 100,
                   );
-                  updateStyle();
+                  updateColor();
                 "
               >
                 -
@@ -201,7 +201,7 @@
                 min="0"
                 max="1"
                 step="0.01"
-                @input="debouncedUpdateStyle"
+                @input="debouncedUpdateColor"
                 class="effect-slider"
               />
               <button
@@ -211,7 +211,7 @@
                     1,
                     Math.round((textColorOpacity + 0.05) * 100) / 100,
                   );
-                  updateStyle();
+                  updateColor();
                 "
               >
                 +
@@ -548,7 +548,7 @@
 <script setup lang="ts">
 import { Shadow, Textbox } from "fabric";
 import FontFaceObserver from "fontfaceobserver";
-import { computed, onMounted, ref, watch } from "vue";
+import { computed, onMounted, onUnmounted, ref, watch } from "vue";
 import { useFabricText } from "../composables/useFabricText";
 import { useFont } from "../composables/useFont";
 import { AVAILABLE_FONTS, DEFAULT_FONT } from "../constants/fonts";
@@ -630,7 +630,11 @@ onMounted(() => {
 watch(selectedText, (text) => {
   if (text) {
     // 選択オブジェクトが有効であることを確認
-    if (!text.canvas || (typeof text.isType === "function" ? text.isType("activeSelection") : (text.isType as unknown) === "activeSelection")) {
+    if (
+      !text.canvas || (typeof text.isType === "function"
+        ? text.isType("activeSelection")
+        : (text.isType as unknown) === "activeSelection")
+    ) {
       console.warn("Selected text invalid or no canvas, skipping style update");
       return;
     }
@@ -657,8 +661,56 @@ watch(selectedText, (text) => {
   }
 }, { immediate: true });
 
-// スタイルの更新
-const updateStyle = () => {
+// キャンバス操作時（リサイズ・スケーリング）に選択中テキストの値を同期
+const syncFromSelectedText = () => {
+  const text = selectedText.value;
+  if (!text) return;
+  const rScale = roundToPointOne(text.scaleX || text.scaleY || 1);
+  scale.value = rScale;
+  if (text.fontSize) {
+    fontSize.value = text.fontSize;
+  }
+  if (text.lineHeight) {
+    lineHeight.value = text.lineHeight;
+  }
+};
+
+const handleCanvasObjectModified = (e: any) => {
+  if (!selectedText.value) return;
+  const target = e.target;
+  if (target === selectedText.value) {
+    syncFromSelectedText();
+  }
+};
+
+// キャンバスイベントの監視（ドラッグによるリサイズ・変形を即座にUIに反映）
+watch(
+  () => store.canvas,
+  (canvas, oldCanvas) => {
+    if (oldCanvas) {
+      oldCanvas.off("object:scaling", handleCanvasObjectModified);
+      oldCanvas.off("object:modified", handleCanvasObjectModified);
+      oldCanvas.off("object:resizing", handleCanvasObjectModified);
+    }
+    if (canvas) {
+      canvas.on("object:scaling", handleCanvasObjectModified);
+      canvas.on("object:modified", handleCanvasObjectModified);
+      canvas.on("object:resizing", handleCanvasObjectModified);
+    }
+  },
+  { immediate: true },
+);
+
+onUnmounted(() => {
+  if (store.canvas) {
+    store.canvas.off("object:scaling", handleCanvasObjectModified);
+    store.canvas.off("object:modified", handleCanvasObjectModified);
+    store.canvas.off("object:resizing", handleCanvasObjectModified);
+  }
+});
+
+// 各スタイルの個別更新（関係ないプロパティを上書きしない）
+const updateFont = () => {
   if (!selectedText.value) return;
 
   const font = fontFamily.value;
@@ -666,43 +718,98 @@ const updateStyle = () => {
 
   const applyFont = () => {
     if (!selectedText.value) return;
-    const rgba = hexToRgb(textColor.value);
     try {
       updateTextStyle(selectedText.value, {
         fontFamily: font,
-        fontSize: fontSize.value,
-        fill: `rgb(${rgba.r} ${rgba.g} ${rgba.b} / ${
-          textColorOpacity.value * 100
-        }%)`,
-        fontWeight: isBold.value ? "bold" : "normal",
-        fontStyle: isItalic.value ? "italic" : "normal",
-        underline: isUnderline.value,
-        textAlign: textAlign.value as any,
-        scaleX: scale.value,
-        scaleY: scale.value,
-        lineHeight: lineHeight.value,
       });
       selectedText.value.setCoords();
       selectedText.value.canvas?.requestRenderAll();
     } catch (e) {
-      console.error("Error updating text style:", e);
+      console.error("Error updating font:", e);
     }
   };
 
   observer.load().then(applyFont).catch((e: Error) => {
-    console.error("Font load failed:", font, e);
+    console.warn("Font load failed:", font, e);
     applyFont();
   });
 };
 
-let updateTimer: number | undefined;
-const debouncedUpdateStyle = () => {
-  clearTimeout(updateTimer);
-  updateTimer = setTimeout(() => {
-    updateStyle();
+const updateColor = () => {
+  if (!selectedText.value) return;
+  const rgba = hexToRgb(textColor.value);
+  try {
+    updateTextStyle(selectedText.value, {
+      fill: `rgb(${rgba.r} ${rgba.g} ${rgba.b} / ${
+        textColorOpacity.value * 100
+      }%)`,
+    });
+    selectedText.value.canvas?.requestRenderAll();
+  } catch (e) {
+    console.error("Error updating text color:", e);
+  }
+};
+
+const updateScale = () => {
+  if (!selectedText.value) return;
+  try {
+    updateTextStyle(selectedText.value, {
+      scaleX: scale.value,
+      scaleY: scale.value,
+    });
+    selectedText.value.setCoords();
+    selectedText.value.canvas?.requestRenderAll();
+  } catch (e) {
+    console.error("Error updating scale:", e);
+  }
+};
+
+const updateLineHeight = () => {
+  if (!selectedText.value) return;
+  try {
+    updateTextStyle(selectedText.value, {
+      lineHeight: lineHeight.value,
+    });
+    selectedText.value.setCoords();
+    selectedText.value.canvas?.requestRenderAll();
+  } catch (e) {
+    console.error("Error updating line height:", e);
+  }
+};
+
+let fontTimer: number | undefined;
+const debouncedUpdateFont = () => {
+  clearTimeout(fontTimer);
+  fontTimer = setTimeout(() => {
+    updateFont();
   }, 100);
 };
 
+let colorTimer: number | undefined;
+const debouncedUpdateColor = () => {
+  clearTimeout(colorTimer);
+  colorTimer = setTimeout(() => {
+    updateColor();
+  }, 100);
+};
+
+let scaleTimer: number | undefined;
+const debouncedUpdateScale = () => {
+  clearTimeout(scaleTimer);
+  scaleTimer = setTimeout(() => {
+    updateScale();
+  }, 100);
+};
+
+let lineHeightTimer: number | undefined;
+const debouncedUpdateLineHeight = () => {
+  clearTimeout(lineHeightTimer);
+  lineHeightTimer = setTimeout(() => {
+    updateLineHeight();
+  }, 100);
+};
+
+let updateTimer: number | undefined;
 const debouncedUpdateShadow = () => {
   clearTimeout(updateTimer);
   updateTimer = setTimeout(() => {
@@ -818,25 +925,37 @@ defineExpose({
 // 太字の切り替え
 const toggleBold = () => {
   isBold.value = !isBold.value;
-  updateStyle();
+  if (!selectedText.value) return;
+  updateTextStyle(selectedText.value, {
+    fontWeight: isBold.value ? "bold" : "normal",
+  });
 };
 
 // 斜体の切り替え
 const toggleItalic = () => {
   isItalic.value = !isItalic.value;
-  updateStyle();
+  if (!selectedText.value) return;
+  updateTextStyle(selectedText.value, {
+    fontStyle: isItalic.value ? "italic" : "normal",
+  });
 };
 
 // 下線の切り替え
 const toggleUnderline = () => {
   isUnderline.value = !isUnderline.value;
-  updateStyle();
+  if (!selectedText.value) return;
+  updateTextStyle(selectedText.value, {
+    underline: isUnderline.value,
+  });
 };
 
 // テキスト配置の設定
 const setTextAlign = (align: any) => {
   textAlign.value = align;
-  updateStyle();
+  if (!selectedText.value) return;
+  updateTextStyle(selectedText.value, {
+    textAlign: align,
+  });
 };
 
 // 影設定
@@ -889,12 +1008,6 @@ watch(selectedText, (text) => {
       backgroundColor.value = rgbToHex(rgba);
       backgroundColorOpacity.value = rgba.a ? rgba.a / 100 : 1;
     }
-
-    // scale
-    const roundScale = roundToPointOne(text.scaleX || text.scaleY || 1);
-    text.scaleX = roundScale;
-    text.scaleY = roundScale;
-    scale.value = roundScale;
   }
 }, { immediate: true });
 
